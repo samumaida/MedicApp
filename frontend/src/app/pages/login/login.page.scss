@@ -1,0 +1,21 @@
+.login-container {
+  max-width: 400px;
+  margin: 40px auto;
+  text-align: center;
+
+  .logo-placeholder {
+    margin-bottom: 30px;
+    h1 {
+      font-weight: 700;
+      color: var(--ion-color-primary);
+    }
+    p {
+      color: var(--ion-color-medium);
+    }
+  }
+
+  ion-list {
+    background: transparent;
+    border-radius: 8px;
+  }
+}

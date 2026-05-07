@@ -1,0 +1,36 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>MedicApp Accesso</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="login-container">
+    <div class="logo-placeholder">
+      <ion-icon name="medical" color="primary" style="font-size: 64px;"></ion-icon>
+      <h1>Benvenuto</h1>
+      <p>Gestisci i tuoi pazienti in sicurezza</p>
+    </div>
+
+    <ion-list lines="full">
+      <ion-item>
+        <ion-label position="floating">Email</ion-label>
+        <ion-input type="email" placeholder="nome@medico.it"></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-label position="floating">Password</ion-label>
+        <ion-input type="password" placeholder="********"></ion-input>
+      </ion-item>
+    </ion-list>
+
+    <div class="ion-margin-top">
+      <ion-button expand="block" (click)="onLogin()">
+        Accedi
+      </ion-button>
+      <ion-button expand="block" fill="clear" color="medium">
+        Password dimenticata?
+      </ion-button>
+    </div>
+  </div>
+</ion-content>
