@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { MockDataService } from '../../services/mock-data';
 
 @Component({
   selector: 'app-login',
@@ -13,12 +14,12 @@ import { Router } from '@angular/router';
 })
 export class LoginPage implements OnInit {
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private mockService: MockDataService) { }
 
   ngOnInit() {}
 
-  onLogin() {
-    console.log('Tentativo di login...');
-    this.router.navigate(['/home']);
-  }
+  async onLogin() {
+  await this.mockService.loginAs('paziente'); 
+  this.router.navigate(['/home']);
+}
 }

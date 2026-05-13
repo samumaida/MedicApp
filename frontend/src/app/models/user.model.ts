@@ -10,3 +10,13 @@ export interface User {
   email: string;
   ruolo: 'medico' | 'paziente';
 }
+
+export interface Appuntamento {
+  id: number;
+  pazienteNome: string;
+  data: string;
+  ora: string;
+  stato: 'confermato' | 'in_attesa' | 'completato';
+  prestazione: string;
+  refertoUrl?: string;
+}

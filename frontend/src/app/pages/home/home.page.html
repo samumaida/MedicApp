@@ -1,20 +1,71 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
+  <ion-toolbar color="primary">
+    <ion-title>MedicApp - Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <div *ngIf="user?.ruolo === 'medico'">
+    <h2>Benvenuto, {{user?.nome}}</h2>
+    <ion-list>
+      <ion-list-header><ion-label>Appuntamenti Odierni</ion-label></ion-list-header>
+      <ion-item *ngFor="let app of listaAppuntamenti">
+        <ion-label>
+          <h3>{{app.pazienteNome}}</h3>
+          <p>{{app.prestazione}} - ore {{app.ora}}</p>
+        </ion-label>
+        <ion-badge slot="end" [color]="app.stato === 'confermato' ? 'success' : 'warning'">
+          {{app.stato}}
+        </ion-badge>
+      </ion-item>
+    </ion-list>
+  </div>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+  <div *ngIf="user?.ruolo === 'paziente'">
+    <h2>I tuoi Referti</h2>
+    <ion-card *ngFor="let app of listaAppuntamenti">
+      <ion-card-header>
+        <ion-card-title>{{app.prestazione}}</ion-card-title>
+        <ion-card-subtitle>{{app.data}}</ion-card-subtitle>
+      </ion-card-header>
+      <ion-card-content>
+        <div *ngIf="app.refertoUrl" class="ion-margin-top">
+          <!-- Button visualizzazione referto -->
+          <ion-button fill="solid" color="secondary" (click)="visualizzaReferto(app.refertoUrl)">
+            <ion-icon name="eye-outline" slot="start"></ion-icon>
+            Visualizza
+          </ion-button>
+          
+          <!-- Button scaricamento referto -->
+          <ion-button fill="outline" color="primary" (click)="scaricaReferto(app.refertoUrl)">
+            <ion-icon name="download-outline" slot="start"></ion-icon>
+            Scarica
+          </ion-button>
+        </div>
+        <p *ngIf="!app.refertoUrl">Referto in fase di elaborazione...</p>
+      </ion-card-content>
+    </ion-card>
   </div>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-tabs>
+      <ion-tab-bar slot="bottom">
+        <ion-tab-button tab="home">
+          <ion-icon name="people"></ion-icon>
+          <ion-label>Pazienti</ion-label>
+        </ion-tab-button>
+        <ion-tab-button (click)="goToAgenda()">
+          <ion-icon name="calendar"></ion-icon>
+          <ion-label>Agenda</ion-label>
+        </ion-tab-button>
+      </ion-tab-bar>
+    </ion-tabs>
+  </ion-toolbar>
+</ion-footer>
