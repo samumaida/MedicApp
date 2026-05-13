@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+full-calendar {
+  display: block;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Rendi il calendario leggibile su mobile */
+.fc {
+  --fc-button-text-color: #fff;
+  --fc-button-bg-color: var(--ion-color-primary);
+  --fc-button-hover-bg-color: var(--ion-color-primary-shade);
+  font-size: 0.8em;
+}
+
+@media (max-width: 768px) {
+  .fc {
+    font-size: 0.75rem; 
+    
+    .fc-toolbar-title {
+      font-size: 1.1rem;
+    }
+
+    .fc-button {
+      padding: 0.4em 0.6em;
+      font-size: 0.8rem;
+    }
+  }
+}
