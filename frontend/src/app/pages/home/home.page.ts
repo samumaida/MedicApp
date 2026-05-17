@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { logOutOutline, people, calendar, documentTextOutline, addCircleOutline, downloadOutline, eyeOutline } from 'ionicons/icons';
+import { logOutOutline, people, calendar, documentTextOutline, addCircleOutline, downloadOutline, eyeOutline, peopleOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
 import { User, Appuntamento } from '../../models/user.model';
@@ -21,7 +21,7 @@ export class HomePage {
   constructor(private mockService: MockDataService, private router: Router) {
     this.user = this.mockService.getCurrentUser();
     this.listaAppuntamenti = this.mockService.getAppuntamenti();
-    addIcons({ logOutOutline, people, calendar, documentTextOutline, addCircleOutline, downloadOutline, eyeOutline });
+    addIcons({ logOutOutline, people, calendar, documentTextOutline, addCircleOutline, downloadOutline, eyeOutline, peopleOutline });
   }
 
   logout() {
@@ -40,7 +40,7 @@ export class HomePage {
     link.click();
   }
 
-  goToAgenda() {
-    this.router.navigateByUrl('/agenda');
+  navigaA(path: string) {
+    this.router.navigate([path]);
   }
 }

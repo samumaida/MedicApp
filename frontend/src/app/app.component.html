@@ -1,3 +1,58 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-menu contentId="main-content" type="overlay">
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-title>MedicApp - Menu</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <ion-list lines="none">
+        <!-- Dashboard -->
+        <ion-menu-toggle auto-hide="false">
+          <ion-item button routerLink="/home" routerDirection="root">
+            <ion-icon slot="start" name="apps-outline"></ion-icon>
+            <ion-label>Dashboard</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <!-- Agenda -->
+        <ion-menu-toggle auto-hide="false">
+          <ion-item button routerLink="/agenda" routerDirection="root">
+            <ion-icon slot="start" name="calendar-outline"></ion-icon>
+            <ion-label>Agenda</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+
+        <!-- Nuovo Appuntamento -->
+        @if (user?.ruolo === 'paziente') {
+          <ion-menu-toggle auto-hide="false">
+            <ion-item button routerLink="/prenota-appuntamento" routerDirection="root">
+              <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+              <ion-label>Prenota Visita</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        } @else if (user?.ruolo === 'medico') {
+          <ion-menu-toggle auto-hide="false">
+            <ion-item button routerLink="/servizi" routerDirection="root">
+              <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+              <ion-label>Servizi</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+
+        <ion-item-divider></ion-item-divider>
+        
+        <!-- Pulsante Logout -->
+        <ion-menu-toggle auto-hide="false">
+          <ion-item button (click)="globalLogout()" detail="false" class="logout-item">
+            <ion-icon slot="start" name="log-out-outline" color="danger"></ion-icon>
+            <ion-label color="danger">Disconnetti</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
+      </ion-list>
+    </ion-content>
+  </ion-menu>
+
+  <ion-router-outlet id="main-content"></ion-router-outlet>
 </ion-app>

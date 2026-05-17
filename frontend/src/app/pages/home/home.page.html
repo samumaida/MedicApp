@@ -1,4 +1,5 @@
-<ion-header [translucent]="true">
+<!-- <ion-header [translucent]="true">
+
   <ion-toolbar color="primary">
     <ion-title>MedicApp - Dashboard</ion-title>
     <ion-buttons slot="end">
@@ -6,6 +7,16 @@
         <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
       </ion-button>
     </ion-buttons>
+  </ion-toolbar>
+</ion-header> -->
+
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <!-- Pulsante Menu aggiunto a sinistra (start) -->
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>MedicApp - Dashboard</ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -57,11 +68,18 @@
   <ion-toolbar>
     <ion-tabs>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button tab="home">
-          <ion-icon name="people"></ion-icon>
-          <ion-label>Pazienti</ion-label>
-        </ion-tab-button>
-        <ion-tab-button (click)="goToAgenda()">
+        @if (user?.ruolo === 'paziente') {
+          <ion-tab-button (click)="navigaA('/prenota-appuntamento')">
+            <ion-icon name="add-circle-outline"></ion-icon>
+            <ion-label>Prenota</ion-label>
+          </ion-tab-button>
+        } @else if (user?.ruolo === 'medico') {
+          <ion-tab-button (click)="navigaA('/pazienti')">
+            <ion-icon name="people-outline"></ion-icon>
+            <ion-label>Pazienti</ion-label>
+          </ion-tab-button>
+        }
+        <ion-tab-button (click)="navigaA('/agenda')">
           <ion-icon name="calendar"></ion-icon>
           <ion-label>Agenda</ion-label>
         </ion-tab-button>

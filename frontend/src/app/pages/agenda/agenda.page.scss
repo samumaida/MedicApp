@@ -18,6 +18,24 @@ full-calendar {
   font-size: 0.8em;
 }
 
+:host {
+  display: block;
+
+  /* Forza l'applicazione del CSS dentro i componenti di terze parti */
+  ::ng-deep {
+    .fc-header-toolbar.fc-toolbar {
+      padding: 15px !important;
+      background: #f4f5f8;
+      border-bottom: 2px solid #e0e0e0;
+      
+      .fc-toolbar-title {
+        font-family: var(--ion-font-family);
+        color: #333;
+      }
+    }
+  }
+}
+
 @media (max-width: 768px) {
   .fc {
     font-size: 0.75rem; 

@@ -19,7 +19,8 @@ export class LoginPage implements OnInit {
   ngOnInit() {}
 
   async onLogin() {
-  await this.mockService.loginAs('paziente'); 
-  this.router.navigate(['/home']);
-}
+    // await this.mockService.loginAs('paziente');
+    await this.mockService.loginAs('medico');
+    this.router.navigate(['/home']);
+  }
 }

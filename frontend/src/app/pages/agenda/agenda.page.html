@@ -7,6 +7,12 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="ion-padding">
-  <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+<!-- Aggiungo la classe nativa di Ionic per forzare il tema chiaro in questo contenuto, 
+      in questo modo evito bug grafici dovuti al tema scuro -->
+<ion-content class="ion-padding ion-palette-light">
+  
+  <div class="light-theme-container" style="background: #ffffff; border-radius: 8px; padding: 8px;">
+    <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+  </div>
+
 </ion-content>

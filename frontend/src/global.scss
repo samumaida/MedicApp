@@ -35,3 +35,8 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+// Aggiunta direttiva per mandare a capo i messaggi di alert con \n
+.alert-message {
+  white-space: pre-line !important;
+}

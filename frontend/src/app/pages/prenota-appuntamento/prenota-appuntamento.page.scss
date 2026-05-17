@@ -1,0 +1,11 @@
+.orari-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+ion-datetime {
+  margin: 0 auto;
+  --background: #fff;
+}

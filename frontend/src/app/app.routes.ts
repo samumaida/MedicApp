@@ -18,4 +18,8 @@ export const routes: Routes = [
     path: 'agenda',
     loadComponent: () => import('./pages/agenda/agenda.page').then( m => m.AgendaPage)
   },
+  {
+    path: 'prenota-appuntamento',
+    loadComponent: () => import('./pages/prenota-appuntamento/prenota-appuntamento.page').then( m => m.PrenotaAppuntamentoPage)
+  },
 ];
