@@ -30,9 +30,71 @@ export class MockDataService {
 
   // Lista dei medici con relativi orari/giorni di disponibilità
   private medici = [
-    { id: 101, nome: 'Dott. M. Rossi', specializzazione: 'cardio', giorniDisponibili: [1, 3, 5], orari: ['09:00', '10:00', '11:00'] }, // Lun, Mer, Ven
-    { id: 102, nome: 'Dott.ssa A. Bianchi', specializzazione: 'cardio', giorniDisponibili: [2, 4], orari: ['14:30', '15:30', '16:30'] }, // Mar, Gio
-    { id: 103, nome: 'Dott. G. Verdi', specializzazione: 'derma', giorniDisponibili: [1, 2, 3, 4, 5], orari: ['10:00', '11:30'] }
+    // CARDIOLOGIA (cardio)
+    { 
+      id: 101, 
+      nome: 'Dott. M. Rossi', 
+      specializzazione: 'cardiologia', 
+      giorniDisponibili: [1, 3, 5], // Lun, Mer, Ven
+      orari: ['09:00', '10:00', '11:00', '12:00'] 
+    },
+    { 
+      id: 102, 
+      nome: 'Dott.ssa A. Bianchi', 
+      specializzazione: 'cardiologia', 
+      giorniDisponibili: [2, 4], // Mar, Gio
+      orari: ['14:30', '15:30', '16:30', '17:30'] 
+    },
+
+    // PEDIATRIA E GINECOLOGIA (pediatria)
+    { 
+      id: 104, 
+      nome: 'Dott.ssa E. Viola', 
+      specializzazione: 'pediatria', 
+      giorniDisponibili: [1, 2, 4], // Lun, Mar, Gio
+      orari: ['08:30', '09:30', '10:30', '11:30'] 
+    },
+    { 
+      id: 105, 
+      nome: 'Dott. F. Neri', 
+      specializzazione: 'pediatria', 
+      giorniDisponibili: [3, 5], // Mer, Ven
+      orari: ['15:00', '16:00', '17:00', '18:00'] 
+    },
+
+    // DIAGNOSTICA PER IMMAGINI / RADIOLOGIA (diagnostica)
+    { 
+      id: 106, 
+      nome: 'Dott.ssa L. Gialli', 
+      specializzazione: 'diagnostica', 
+      giorniDisponibili: [1, 2, 3, 4, 5], // Lun-Ven (Servizio continuo)
+      orari: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00'] 
+    },
+
+    // ANALISI DI LABORATORIO (laboratorio)
+    { 
+      id: 107, 
+      nome: 'Centro Prelievi (Dott. S. Bruno)', 
+      specializzazione: 'laboratorio', 
+      giorniDisponibili: [1, 2, 3, 4, 5, 6], // Lun-Sab (Incluso sabato mattina per i prelievi)
+      orari: ['07:30', '08:00', '08:30', '09:00', '09:30', '10:00'] 
+    },
+
+    // ORTOPEDIA E FISIATRIA (ortopedia)
+    { 
+      id: 108, 
+      nome: 'Dott. R. Marroni', 
+      specializzazione: 'ortopedia', 
+      giorniDisponibili: [2, 5], // Mar, Ven
+      orari: ['09:00', '10:30', '14:00', '15:30'] 
+    },
+    { 
+      id: 109, 
+      nome: 'Dott.ssa C. Grigio (Fisioterapista)', 
+      specializzazione: 'ortopedia', 
+      giorniDisponibili: [1, 3, 4], // Lun, Mer, Gio
+      orari: ['11:00', '12:00', '16:00', '17:00', '18:00'] 
+    }
   ];
 
   constructor() { 
@@ -53,9 +115,13 @@ export class MockDataService {
     }
 
     if (this.currentUser) {
-      console.log('Sessione recuperata:', this.currentUser);
+        console.log('Sessione recuperata:', this.currentUser);
+      }
     }
-  }
+
+    private salvaSuStorage() {
+      localStorage.setItem('lista_appuntamenti', JSON.stringify(this.appuntamenti));
+    }
 
   async loginAs(ruolo: 'medico' | 'paziente') {
     this.currentUser = {
@@ -99,15 +165,25 @@ export class MockDataService {
 
   addAppuntamento(nuovo: Appuntamento) {
     this.appuntamenti.push(nuovo);
-    //Salvo l'appuntamento anche nel localStorage per persistenza
-    localStorage.setItem('lista_appuntamenti', JSON.stringify(this.appuntamenti));
+    this.salvaSuStorage();
+    console.log('Nuovo appuntamento salvato.');
   }
 
   removeAppuntamento(id: number) {
-  // Filtro l'array tenendo tutti gli appuntamenti tranne quello con l'ID selezionato
-  this.appuntamenti = this.appuntamenti.filter(app => app.id !== id);
-  // Aggiorno il localStorage per mantenere la modifica al refresh
-  localStorage.setItem('lista_appuntamenti', JSON.stringify(this.appuntamenti));
-  console.log(`Appuntamento ${id} eliminato.`);
-}
+    this.appuntamenti = this.appuntamenti.filter(app => app.id !== id);
+    this.salvaSuStorage();
+    console.log(`Appuntamento ${id} eliminato.`);
+  }
+
+  updateStatoAppuntamento(id: number, nuovoStato: 'confermato' | 'rifiutato' | 'in attesa' | 'completato') {
+    const appuntamento = this.appuntamenti.find(app => app.id === id);
+    if (appuntamento) {
+      appuntamento.stato = nuovoStato;
+      
+      this.salvaSuStorage(); 
+      console.log(`Stato appuntamento ${id} aggiornato a "${nuovoStato}" con successo.`);
+    } else {
+      console.error(`Impossibile trovare l'appuntamento con ID ${id}`);
+    }
+  }
 }

@@ -11,14 +11,63 @@
   
   <!-- SELEZIONE VISITA -->
   <div *ngIf="step === 1">
-    <h3>1. Seleziona il tipo di visita</h3>
-    <ion-list lines="inset" class="ion-margin-top">
-      <ion-item button *ngFor="let p of listaPrestazioni" (click)="selezionaPrestazione(p)">
-        <ion-icon slot="start" name="medical-outline" color="primary"></ion-icon>
-        <ion-label>{{ p.nome }}</ion-label>
-        <ion-icon slot="end" name="chevron-forward-outline"></ion-icon>
-      </ion-item>
-    </ion-list>
+    <h3 class="ion-padding-horizontal">Seleziona il tipo di visita</h3>
+    
+    <!-- Ripristiniamo la griglia con i suoi spazi nativi -->
+    <ion-grid fixed class="ion-margin-top">
+      <ion-row>
+        <ion-accordion-group style="width: 100%; display: contents;">
+          
+          <!-- Aggiunto padding orizzontale nativo per separare le colonne da 768px in su -->
+          <ion-col size="12" size-md="6" *ngFor="let cat of categoriePrestazioni" style="display: flex; flex-direction: column;">
+            
+            <!-- Cambiato margin-bottom in una classe e rimosso gli stili che forzavano l'attaccamento -->
+            <ion-accordion [value]="cat.id" class="accordion-categoria ion-margin-bottom">
+              
+              <!-- Intestazione della Categoria con Immagine -->
+              <ion-item slot="header" color="light" lines="none">
+                <ion-avatar slot="start" class="categoria-avatar">
+                  <!-- Percorso pulito e corretto per la cartella assets globale -->
+                  <img src="assets/images/Pediatria.png" [alt]="cat.nome" (error)="$any($event.target).src = 'assets/icon/favicon.png'" />
+                </ion-avatar>
+                
+                <ion-label>
+                  <h2 style="font-size: 1.1rem; font-weight: 600;">{{ cat.nome }}</h2>
+                  <p style="font-size: 0.85rem;">{{ cat.prestazioni.length }} esami disponibili</p>
+                </ion-label>
+              </ion-item>
+
+              <!-- Contenuto della Categoria (Lista Card Esami) -->
+              <div slot="content" class="ion-padding-vertical" style="background: var(--ion-color-step-50, #f4f5f8);">
+                
+                <ion-card 
+                  button 
+                  *ngFor="let p of cat.prestazioni" 
+                  (click)="selezionaPrestazione(p, cat.id)"
+                  class="ion-margin-horizontal ion-margin-bottom"
+                  style="border-left: 4px solid var(--ion-color-primary); margin-top: 0;">
+                  <ion-card-content class="ion-display-flex ion-align-items-center ion-justify-content-between" style="padding: 14px;">
+                    
+                    <div class="ion-display-flex ion-align-items-center" style="flex: 1; padding-right: 8px;">
+                      <ion-icon name="medical-outline" color="primary" size="large" class="ion-margin-end"></ion-icon>
+                      <ion-label class="ion-text-wrap">
+                        <h3 style="font-weight: 600; color: var(--ion-color-dark); margin: 0; font-size: 1rem;">{{ p.nome }}</h3>
+                        <p *ngIf="p.descrizione" style="margin-top: 4px; font-size: 0.85rem; line-height: 1.2;">{{ p.descrizione }}</p>
+                      </ion-label>
+                    </div>
+                    
+                    <ion-icon name="chevron-forward-outline" color="medium"></ion-icon>
+                  </ion-card-content>
+                </ion-card>
+
+              </div>
+            </ion-accordion>
+
+          </ion-col>
+          
+        </ion-accordion-group>
+      </ion-row>
+    </ion-grid>
   </div>
 
   <!-- SELEZIONE DATA -->
@@ -27,10 +76,10 @@
       <ion-button fill="clear" (click)="indietro(1)">
         <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
       </ion-button>
-      <h3>2. Scegli il giorno</h3>
+      <h3>Scegli il giorno</h3>
     </div>
     
-    <ion-card>
+    <ion-card style="max-width: 500px; margin: 20px auto;">
       <ion-card-content class="ion-no-padding">
         <!-- Calendario per scegliere il giorno -->
         <ion-datetime 
@@ -48,7 +97,7 @@
       <ion-button fill="clear" (click)="indietro(2)">
         <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
       </ion-button>
-      <h3>3. Dottori e Orari disponibili</h3>
+      <h3>Dottori e Orari disponibili</h3>
     </div>
 
     <p class="ion-padding-horizontal">Data scelta: <b>{{ dataSelezionata | date:'dd/MM/yyyy' }}</b></p>
@@ -57,23 +106,25 @@
       <p>Nessun medico disponibile per questa prestazione nel giorno selezionato.</p>
     </div>
 
-    <ion-card *ngFor="let medico of mediciFiltrati">
-      <ion-card-header>
-        <ion-card-title>{{ medico.nome }}</ion-card-title>
-        <ion-card-subtitle>Orari disponibili:</ion-card-subtitle>
-      </ion-card-header>
-      <ion-card-content>
-        <div class="orari-container">
-          <ion-button 
-            size="small" 
-            fill="outline" 
-            *ngFor="let ora of medico.orari" 
-            (click)="confermaPrenotazione(medico, ora)">
-            {{ ora }}
-          </ion-button>
-        </div>
-      </ion-card-content>
-    </ion-card>
+    <div style="max-width: 800px; margin: 0 auto;">
+      <ion-card *ngFor="let medico of mediciFiltrati">
+        <ion-card-header>
+          <ion-card-title>{{ medico.nome }}</ion-card-title>
+          <ion-card-subtitle>Orari disponibili:</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="orari-container" style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <ion-button 
+              size="small" 
+              fill="outline" 
+              *ngFor="let ora of medico.orari" 
+              (click)="confermaPrenotazione(medico, ora)">
+              {{ ora }}
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
   </div>
 
 </ion-content>

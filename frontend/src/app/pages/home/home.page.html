@@ -1,15 +1,3 @@
-<!-- <ion-header [translucent]="true">
-
-  <ion-toolbar color="primary">
-    <ion-title>MedicApp - Dashboard</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="logout()">
-        <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header> -->
-
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <!-- Pulsante Menu aggiunto a sinistra (start) -->
@@ -30,7 +18,10 @@
           <h3>{{app.pazienteNome}}</h3>
           <p>{{app.prestazione}} - ore {{app.ora}}</p>
         </ion-label>
-        <ion-badge slot="end" [color]="app.stato === 'confermato' ? 'success' : 'warning'">
+        <ion-badge slot="end" [color]="app.stato === 'confermato' ? 'success' 
+                               : app.stato === 'completato' ? 'primary' 
+                                : app.stato === 'rifiutato' ? 'danger' 
+                                 : 'warning'">
           {{app.stato}}
         </ion-badge>
       </ion-item>

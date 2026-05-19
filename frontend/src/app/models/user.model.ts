@@ -16,7 +16,7 @@ export interface Appuntamento {
   pazienteNome: string;
   data: string;
   ora: string;
-  stato: 'confermato' | 'in attesa' | 'completato';
+  stato: 'confermato' | 'in attesa' | 'rifiutato' | 'completato';
   prestazione: string;
   refertoUrl?: string;
 }

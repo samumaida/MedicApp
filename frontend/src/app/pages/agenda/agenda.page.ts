@@ -8,6 +8,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { MockDataService } from '../../services/mock-data';
+import { User } from '../../models/user.model';
 
 @Component({
   selector: 'app-agenda',
@@ -24,6 +25,8 @@ import { MockDataService } from '../../services/mock-data';
 
 export class AgendaPage implements OnInit {
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
+
+  currentUser: User | null = null;
 
   calendarOptions: any = {
     plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
@@ -71,6 +74,9 @@ export class AgendaPage implements OnInit {
   constructor(private mockService: MockDataService, private alertCtrl: AlertController, private toastCtrl: ToastController) {}
 
   ngOnInit() {
+    this.mockService.user$.subscribe(user => {
+      this.currentUser = user;
+    });
     this.caricaAppuntamentiSuCalendario();
   }
 
@@ -93,7 +99,10 @@ export class AgendaPage implements OnInit {
         title: app.prestazione,
         start: dataInizio,
         end: dataFine,
-        color: app.stato === 'confermato' ? '#3880ff' : '#ffc409',
+        color: app.stato === 'confermato' ? '#2DD55B' 
+                : app.stato === 'completato' ? '#3880ff' 
+                : app.stato === 'rifiutato' ? '#eb445a' 
+                  : '#ffc409',
         extendedProps: {
           pazienteNome: app.pazienteNome,
           ora: app.ora,
@@ -113,51 +122,89 @@ export class AgendaPage implements OnInit {
     const idAppuntamento = parseInt(evento.id);
     const props = evento.extendedProps;
 
-  // Se props.data è undefined, estraggo la data direttamente dall'oggetto 'start' di FullCalendar
-  let dataFormattata = '';
-  if (props && props.data) {
-    dataFormattata = props.data.split('-').reverse().join('/');
-  } else if (evento.start) {
-    // Formatto la data nativa (Date object) in GG/MM/AAAA
-    const d = evento.start;
-    dataFormattata = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
-  }
+    // Se props.data è undefined, estraggo la data direttamente dall'oggetto 'start' di FullCalendar
+    let dataFormattata = '';
+    if (props && props.data) {
+      dataFormattata = props.data.split('-').reverse().join('/');
+    } else if (evento.start) {
+      // Formatto la data nativa (Date object) in GG/MM/AAAA
+      const d = evento.start;
+      dataFormattata = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+    }
 
-  // Recupero dell'orario
-  let orarioMostrato = '';
-  if (props && props.ora) {
-    orarioMostrato = props.ora;
-  } else if (evento.start) {
-    orarioMostrato = `${evento.start.getHours().toString().padStart(2, '0')}:${evento.start.getMinutes().toString().padStart(2, '0')}`;
-  }
+    // Recupero dell'orario
+    let orarioMostrato = '';
+    if (props && props.ora) {
+      orarioMostrato = props.ora;
+    } else if (evento.start) {
+      orarioMostrato = `${evento.start.getHours().toString().padStart(2, '0')}:${evento.start.getMinutes().toString().padStart(2, '0')}`;
+    }
 
-  // Recupero dello stato
-  const statoMostrato = props && props.stato ? props.stato.toUpperCase() : 'CONFERMATO';
-  const pazienteMostrato = props && props.pazienteNome ? props.pazienteNome : 'N/D';
+    // Recupero dello stato
+    const statoAttuale = props && props.stato ? props.stato.toUpperCase() : 'IN ATTESA';
+    const pazienteMostrato = props && props.pazienteNome ? props.pazienteNome : 'N/D';
+    const medicoMostrato = this.currentUser?.ruolo === 'medico' ? pazienteMostrato : evento.extendedProps.medicoNome || 'N/D';
 
-    const alert = await this.alertCtrl.create({
-    header: evento.title,
-    subHeader: `Paziente: ${pazienteMostrato}`,
-    message: `📅 Giorno: ${dataFormattata}\n\n⏰ Orario: ${orarioMostrato}\n\n📌 Stato: ${statoMostrato}`,
-    buttons: [
+    const bottoniAlert: any[] = [
       {
         text: 'Chiudi',
         role: 'cancel',
         cssClass: 'secondary'
-      },
-      {
-        text: 'Elimina Prenotazione',
-        role: 'destructive',
-        handler: () => {
-          // Apro il popup di conferma definitiva
-          this.mostraConfermaCancellazione(idAppuntamento);
-        }
       }
-    ]
-  });
+    ];
 
-  await alert.present();
-}
+    // Se l'utente loggato è un 'medico' e l'appuntamento è 'in attesa', aggiungo i comandi di approvazione
+    if (this.currentUser?.ruolo === 'medico' && statoAttuale === 'IN ATTESA') {
+      bottoniAlert.push({
+        text: 'Accetta Appuntamento',
+        role: 'confirm',
+        handler: () => {
+          this.cambiaStatoEInforma(idAppuntamento, 'confermato', 'Appuntamento approvato e inserito in agenda.');
+        }
+      });
+      
+      bottoniAlert.push({
+        text: 'Rifiuta',
+        handler: () => {
+          this.cambiaStatoEInforma(idAppuntamento, 'rifiutato', 'Appuntamento rifiutato.');
+        }
+      });
+    }
+
+    bottoniAlert.push({
+      text: 'Elimina Prenotazione',
+      role: 'destructive',
+      handler: () => {
+        this.mostraConfermaCancellazione(idAppuntamento);
+      }
+    });
+
+    const alert = await this.alertCtrl.create({
+      header: evento.title,
+      subHeader: this.currentUser?.ruolo === 'medico' ? `Paziente: ${pazienteMostrato}` : `Dottore: ${medicoMostrato}`,
+      message: `📅 Giorno: ${dataFormattata}\n\n⏰ Orario: ${orarioMostrato}\n\n📌 Stato: ${statoAttuale.toUpperCase().replace('_', ' ')}`,
+      buttons: bottoniAlert
+    });
+
+    await alert.present();
+  }
+
+  async cambiaStatoEInforma(id: number, nuovoStato: 'confermato' | 'rifiutato', messaggioToast: string) {
+    // 1. Aggiorna sul servizio mock
+    this.mockService.updateStatoAppuntamento(id, nuovoStato);
+    
+    // 2. Ricarica i dati locali per aggiornare i colori su FullCalendar
+    this.caricaAppuntamentiSuCalendario();
+
+    // 3. Mostra la notifica di successo
+    const toast = await this.toastCtrl.create({
+      message: messaggioToast,
+      duration: 2500,
+      color: nuovoStato === 'confermato' ? 'success' : 'warning',
+      position: 'bottom'
+    });
+    await toast.present();
+  }
 
 async mostraConfermaCancellazione(id: number) {
   const alertConferma = await this.alertCtrl.create({

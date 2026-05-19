@@ -9,3 +9,48 @@ ion-datetime {
   margin: 0 auto;
   --background: #fff;
 }
+
+.accordion-categoria {
+  border: 1px solid var(--ion-color-step-150, #d7d8da);
+  border-radius: 12px; 
+  overflow: hidden;
+  background: var(--ion-item-background, #fff);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.categoria-avatar {
+  width: 14vw;       
+  height: 14vw;      
+  max-width: 65px;
+  max-height: 65px;  
+  min-width: 48px;   
+  min-height: 48px;
+  margin-right: 12px;
+  --border-radius: 50%; 
+  
+  img {
+    object-fit: cover;
+  }
+}
+
+@media (min-width: 768px) {
+  ion-col {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
+  .accordion-categoria {
+    margin-bottom: 8px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .categoria-avatar {
+    width: 80px !important;
+    height: 80px !important;
+    max-width: 80px;
+    max-height: 80px;
+  }
+}
