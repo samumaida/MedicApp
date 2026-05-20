@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-login',
@@ -13,19 +14,91 @@ import { MockDataService } from '../../services/mock-data';
   imports: [IonicModule, CommonModule, FormsModule]
 })
 export class LoginPage implements OnInit {
+  // Controlla quale vista mostrare tra 'login' o 'register'
+  segmentModel: 'login' | 'register' = 'login';
 
-  constructor(private router: Router, private mockService: MockDataService) { }
+  loginData = {
+    email: '',
+    password: ''
+  };
+
+  registerData = {
+    nome: '',
+    cognome: '',
+    codiceFiscale: '',
+    dataNascita: '',
+    sesso: 'M',
+    email: '',
+    password: '',
+    ruolo: 'paziente'
+  };
+
+  constructor(
+    private router: Router, 
+    private authService: AuthService,
+    private toastCtrl: ToastController
+  ) { }
 
   ngOnInit() {}
 
-  async onLogin() {
-    await this.mockService.loginAs('paziente');
-    // await this.mockService.loginAs('medico');
-    this.router.navigate(['/home']);
+  // Gestisce il cambio di tab tra Accedi e Registrati
+  segmentChanged(event: any) {
+    this.segmentModel = event.detail.value;
   }
 
-  async onRegister() {
-    // await this.mockService.registerNewUser();
-    this.router.navigate(['/home']);
+  async onLogin() {
+    if (!this.loginData.email || !this.loginData.password) {
+      this.presentToast('Inserisci email e password', 'danger');
+      return;
+    }
+
+    console.log('Dati inviati per il login:', this.loginData);
+    
+    this.authService.login(this.loginData).subscribe({
+      next: (res) => {
+        this.presentToast(res.message || 'Bentornato!', 'success');
+        
+        this.router.navigate(['/home']);
+      },
+      error: (err) => {
+        console.error('Errore login:', err);
+        const msg = err.error?.message || 'Errore di connessione al server';
+        this.presentToast(msg, 'danger');
+      }
+    });
+  }
+
+  onRegister() {
+    if (!this.registerData.nome || !this.registerData.cognome || !this.registerData.email || !this.registerData.password) {
+      this.presentToast('Compila tutti i campi obbligatori (*)', 'danger');
+      return;
+    }
+
+    // Passiamo l'intero oggetto registerData a NestJS
+    this.authService.register(this.registerData).subscribe({
+      next: (res) => {
+        this.presentToast('Registrazione completata con successo! Ora puoi accedere.', 'success');
+        this.segmentModel = 'login'; // Sposto l'utente automaticamente sul tab di Login
+      },
+      error: (err) => {
+        console.error('Errore registrazione:', err);
+        // Intercetto eventuali errori di mail duplicata o fallita validazione
+        const msg = err.error?.message || 'Impossibile completare la registrazione';
+        
+        // Gestisco Se NestJS restituisce un array di errori di validazione
+        const errorText = Array.isArray(msg) ? msg.join(', ') : msg;
+        this.presentToast(errorText, 'danger');
+      }
+    });
+  }
+
+  private async presentToast(message: string, color: string) {
+    const toast = await this.toastCtrl.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'bottom'
+    });
+    await toast.present();
   }
 }

@@ -13,29 +13,87 @@
       <p>Accedi o registrati per continuare</p>
     </div>
 
-    <ion-list lines="full">
-      <ion-item>
-        <ion-label position="floating">Email</ion-label>
-        <ion-input type="email" placeholder="nome@medico.it"></ion-input>
-      </ion-item>
+    <!-- Selettore per switchare tra Login e Registrazione -->
+    <ion-segment [value]="segmentModel" (ionChange)="segmentChanged($event)" class="ion-margin-bottom">
+      <ion-segment-button value="login">
+        <ion-label>Accedi</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="register">
+        <ion-label>Registrati</ion-label>
+      </ion-segment-button>
+    </ion-segment>
 
-      <ion-item>
-        <ion-label position="floating">Password</ion-label>
-        <ion-input type="password" placeholder="********"></ion-input>
-      </ion-item>
-    </ion-list>
+    <!-- SEZIONE "ACCEDI" -->
+    <div *ngIf="segmentModel === 'login'">
+      <ion-list lines="full">
+        <ion-item>
+          <ion-input label="Email" labelPosition="floating" type="email" placeholder="nome@esempio.it" [(ngModel)]="loginData.email"></ion-input>
+        </ion-item>
 
-    <div class="ion-margin-top">
-      <ion-button expand="block" (click)="onLogin()">
-        Accedi
-      </ion-button>
-      {{'oppure'}}
-      <ion-button expand="block" (click)="onRegister()">
-        Registrati
-      </ion-button>
-      <ion-button expand="block" fill="clear" color="medium">
-        Password dimenticata?
-      </ion-button>
+        <ion-item>
+          <ion-input label="Password" labelPosition="floating" type="password" placeholder="********" [(ngModel)]="loginData.password"></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <div class="ion-margin-top">
+        <ion-button expand="block" (click)="onLogin()">
+          Accedi
+        </ion-button>
+        <ion-button expand="block" fill="clear" color="medium">
+          Password dimenticata?
+        </ion-button>
+      </div>
     </div>
+
+    <!-- SEZIONE "REGISTRATI" -->
+    <div *ngIf="segmentModel === 'register'">
+      <ion-list lines="full">
+        
+        <ion-item class="ion-margin-bottom" style="--background: var(--ion-color-light); margin-bottom: 16px;">
+          <ion-select label="Tipo di Account *" labelPosition="floating" [(ngModel)]="registerData.ruolo">
+            <ion-select-option value="paziente">Paziente (Cerca visite e referti)</ion-select-option>
+            <ion-select-option value="medico">Medico Professionista</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-input label="Nome *" labelPosition="floating" type="text" placeholder="Mario" [(ngModel)]="registerData.nome"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input label="Cognome *" labelPosition="floating" type="text" placeholder="Rossi" [(ngModel)]="registerData.cognome"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input label="Codice Fiscale" labelPosition="floating" type="text" placeholder="RSSMRA..." [(ngModel)]="registerData.codiceFiscale"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input label="Data di Nascita" labelPosition="floating" type="date" [(ngModel)]="registerData.dataNascita"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-select label="Sesso" labelPosition="floating" [(ngModel)]="registerData.sesso">
+            <ion-select-option value="M">Maschio</ion-select-option>
+            <ion-select-option value="F">Femmina</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <ion-item>
+          <ion-input label="Email *" labelPosition="floating" type="email" placeholder="mario.rossi@esempio.it" [(ngModel)]="registerData.email"></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input label="Password *" labelPosition="floating" type="password" placeholder="********" [(ngModel)]="registerData.password"></ion-input>
+        </ion-item>
+      </ion-list>
+
+      <div class="ion-margin-top">
+        <ion-button expand="block" color="success" (click)="onRegister()">
+          Crea Account
+        </ion-button>
+      </div>
+    </div>
+
   </div>
 </ion-content>
