@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { PrestazioniModule } from './prestazioni/prestazioni.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AuthModule } from './auth/auth.module';
       synchronize: true,     // Crea/aggiorna le tabelle a ogni avvio
     }),
     AuthModule,
+    PrestazioniModule,
   ],
 })
 export class AppModule {}

@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
+import { Prestazione } from '../../prestazioni/entities/prestazione.entity';
 
 // Definisco i ruoli possibili con un Enum
 export enum UserRole {
@@ -31,4 +32,12 @@ export class User {
     default: UserRole.PAZIENTE,
   })
   ruolo!: UserRole;
+
+  @ManyToMany(() => Prestazione, (prestazione) => prestazione.medici, { cascade: true })
+  @JoinTable({
+    name: 'medico_prestazioni', // Tabella di giunzione nel DB
+    joinColumn: { name: 'medico_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'prestazione_id', referencedColumnName: 'id' }
+  })
+  prestazioni!: Prestazione[];
 }
