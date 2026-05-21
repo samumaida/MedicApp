@@ -123,28 +123,6 @@ export class MockDataService {
       localStorage.setItem('lista_appuntamenti', JSON.stringify(this.appuntamenti));
     }
 
-  async loginAs(ruolo: 'medico' | 'paziente') {
-    this.currentUser = {
-      id: ruolo === 'medico' ? 1 : 2,
-      nome: ruolo === 'medico' ? 'Dott. House' : 'Sig. Rossi',
-      cognome: '',
-      sesso: 'M',
-      CF: 'RSSMRA80A01H501U',
-      dataNascita: new Date('1980-01-01'),
-      NumeroTelefono: '1234567890',
-      indirizzo: 'Via Roma 1, Milano',
-      ruolo: ruolo,
-      email: ruolo + '@test.it'
-    };
-
-    localStorage.setItem('user_session', JSON.stringify(this.currentUser));
-
-    // Aggiorno il BehaviorSubject con il nuovo utente
-    this.userSubject.next(this.currentUser);
-
-    console.debug('Login effettuato e sessione salvata:', this.currentUser);
-  }
-
   getCurrentUser() { 
     return this.currentUser; 
   }

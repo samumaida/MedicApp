@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { MockDataService } from '../../services/mock-data';
 import { AuthService } from '../../services/auth';
+import { addIcons } from 'ionicons';
+import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-login',
@@ -33,11 +34,15 @@ export class LoginPage implements OnInit {
     ruolo: 'paziente'
   };
 
+  showPassword = false;
+
   constructor(
     private router: Router, 
     private authService: AuthService,
     private toastCtrl: ToastController
-  ) { }
+  ) { 
+    addIcons({ eyeOutline, eyeOffOutline });
+   }
 
   ngOnInit() {}
 
@@ -74,7 +79,7 @@ export class LoginPage implements OnInit {
       return;
     }
 
-    // Passiamo l'intero oggetto registerData a NestJS
+    // Passo l'intero oggetto registerData a NestJS
     this.authService.register(this.registerData).subscribe({
       next: (res) => {
         this.presentToast('Registrazione completata con successo! Ora puoi accedere.', 'success');
@@ -100,5 +105,9 @@ export class LoginPage implements OnInit {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
   }
 }

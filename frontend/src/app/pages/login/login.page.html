@@ -57,11 +57,25 @@
         </ion-item>
 
         <ion-item>
-          <ion-input label="Nome *" labelPosition="floating" type="text" placeholder="Mario" [(ngModel)]="registerData.nome"></ion-input>
+          <ion-input 
+            label="Nome *" 
+            labelPosition="floating" 
+            type="text" 
+            placeholder="Mario" 
+            [(ngModel)]="registerData.nome"
+            required>
+          </ion-input>
         </ion-item>
 
         <ion-item>
-          <ion-input label="Cognome *" labelPosition="floating" type="text" placeholder="Rossi" [(ngModel)]="registerData.cognome"></ion-input>
+          <ion-input 
+            label="Cognome *" 
+            labelPosition="floating" 
+            type="text" 
+            placeholder="Rossi" 
+            [(ngModel)]="registerData.cognome" 
+            required>
+          </ion-input>
         </ion-item>
 
         <ion-item>
@@ -80,11 +94,38 @@
         </ion-item>
 
         <ion-item>
-          <ion-input label="Email *" labelPosition="floating" type="email" placeholder="mario.rossi@esempio.it" [(ngModel)]="registerData.email"></ion-input>
+          <ion-input 
+            label="Email *" 
+            labelPosition="floating" 
+            type="email" 
+            placeholder="mario.rossi@esempio.it" 
+            [(ngModel)]="registerData.email"
+            required>
+          </ion-input>
         </ion-item>
 
         <ion-item>
-          <ion-input label="Password *" labelPosition="floating" type="password" placeholder="********" [(ngModel)]="registerData.password"></ion-input>
+          <ion-input 
+            label="Password *" 
+            labelPosition="floating" 
+            [type]="showPassword ? 'text' : 'password'" 
+            placeholder="********" 
+            [(ngModel)]="registerData.password"
+            name="password"
+            required>
+            <ion-button 
+              *ngIf="registerData.password.length > 0"
+              fill="clear" 
+              slot="end" 
+              (click)="togglePassword()" 
+              type="button"
+              aria-label="Mostra o nascondi password">
+              <ion-icon 
+                slot="icon-only" 
+                [name]="showPassword ? 'eye-off-outline' : 'eye-outline'">
+              </ion-icon>
+            </ion-button>
+          </ion-input>
         </ion-item>
       </ion-list>
 
