@@ -19,7 +19,7 @@ export class PrenotaAppuntamentoPage implements OnInit {
   step: number = 1;
   
   listaPrestazioni: any[] = [];
-  mediciFiltrati: any[] = [];
+  operatoriFiltrati: any[] = [];
   
   prestazioneScelta: Prestazione | null = null;
   dataSelezionata: string = '';
@@ -53,8 +53,8 @@ export class PrenotaAppuntamentoPage implements OnInit {
     let giornoSettimana = dataObj.getDay(); 
     if (giornoSettimana === 0) giornoSettimana = 7; // Adatto domenica = 7
 
-    // 1. Recuperiamo tutti i medici dal service
-    const tuttiIMedici = this.mockService.getMedici();
+    // 1. Recuperiamo tutti gli operatori dal service
+    const tuttiGliOperatori = this.mockService.getOperatori();
 
     // 2. Troviamo la categoria di appartenenza della prestazione.
     // Se l'oggetto 'prestazioneScelta' ha già al suo interno l'id della categoria (es. prestazioneScelta.categoriaId), usa quello!
@@ -62,12 +62,12 @@ export class PrenotaAppuntamentoPage implements OnInit {
     const categoriaDaFiltrare = this.categoriaSelezionataId;
 
     // 3. Applichiamo il filtro corretto
-    this.mediciFiltrati = tuttiIMedici.filter(medico => 
-      medico.specializzazione === categoriaDaFiltrare &&
-      medico.giorniDisponibili.includes(giornoSettimana)
+    this.operatoriFiltrati = tuttiGliOperatori.filter(operatore => 
+      operatore.specializzazione === categoriaDaFiltrare &&
+      operatore.giorniDisponibili.includes(giornoSettimana)
     );
 
-    console.log('Medici trovati per questo giorno:', this.mediciFiltrati);
+    console.log('Operatori trovati per questo giorno:', this.operatoriFiltrati);
 
     this.step = 3;
   }
@@ -76,12 +76,12 @@ export class PrenotaAppuntamentoPage implements OnInit {
     this.step = targetStep;
   }
 
-  async confermaPrenotazione(medico: any, ora: string) {
+  async confermaPrenotazione(operatore: any, ora: string) {
     const utenteCorrente = this.mockService.getCurrentUser();
 
     const nuovoApp: Appuntamento = {
       id: Math.floor(Math.random() * 1000), // Creo un ID provvisorio dal timestamp
-      pazienteNome: utenteCorrente?.nome + ' ' + utenteCorrente?.cognome,
+      clienteNome: utenteCorrente?.nome + ' ' + utenteCorrente?.cognome,
       data: this.dataSelezionata,
       ora: ora,
       stato: 'in attesa',
@@ -91,7 +91,7 @@ export class PrenotaAppuntamentoPage implements OnInit {
     this.mockService.addAppuntamento(nuovoApp);
 
     const toast = await this.toastCtrl.create({
-      message: `Appuntamento richiesto con il ${medico.nome}. Riceverai una mail di conferma appena sarà approvato dal medico.`,
+      message: `Appuntamento richiesto con il ${operatore.nome}. Riceverai una mail di conferma appena sarà approvato dal medico.`,
       duration: 3000,
       color: 'success',
       position: 'bottom'

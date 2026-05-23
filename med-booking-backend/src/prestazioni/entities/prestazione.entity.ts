@@ -18,6 +18,7 @@ export class Prestazione {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0.00 })
   prezzo!: number;
 
+  // Rendiamo generica la relazione ManyToMany che punta agli operatori
   @ManyToMany(() => User, (user) => user.prestazioni)
-  medici!: User[];
+  operatori!: User[];
 }

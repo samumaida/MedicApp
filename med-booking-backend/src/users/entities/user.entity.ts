@@ -3,8 +3,8 @@ import { Prestazione } from '../../prestazioni/entities/prestazione.entity';
 
 // Definisco i ruoli possibili con un Enum
 export enum UserRole {
-  PAZIENTE = 'paziente',
-  MEDICO = 'medico',
+  CLIENTE = 'cliente',
+  OPERATORE = 'operatore',
   ADMIN = 'admin',
 }
 
@@ -29,14 +29,14 @@ export class User {
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.PAZIENTE,
+    default: UserRole.CLIENTE,
   })
   ruolo!: UserRole;
 
-  @ManyToMany(() => Prestazione, (prestazione) => prestazione.medici, { cascade: true })
+  @ManyToMany(() => Prestazione, (prestazione) => prestazione.operatori, { cascade: true })
   @JoinTable({
-    name: 'medico_prestazioni', // Tabella di giunzione nel DB
-    joinColumn: { name: 'medico_id', referencedColumnName: 'id' },
+    name: 'operatore_prestazioni', // Tabella di giunzione nel DB
+    joinColumn: { name: 'operatore_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'prestazione_id', referencedColumnName: 'id' }
   })
   prestazioni!: Prestazione[];

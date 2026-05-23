@@ -8,12 +8,12 @@ export interface User {
   NumeroTelefono: string;
   indirizzo: string;
   email: string;
-  ruolo: 'medico' | 'paziente';
+  ruolo: 'operatore' | 'cliente' | 'admin';
 }
 
 export interface Appuntamento {
   id: number;
-  pazienteNome: string;
+  clienteNome: string;
   data: string;
   ora: string;
   stato: 'confermato' | 'in attesa' | 'rifiutato' | 'completato';

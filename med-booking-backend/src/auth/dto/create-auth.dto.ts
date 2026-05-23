@@ -21,7 +21,7 @@ export class CreateAuthDto {
   @IsEnum(UserRole, { message: 'Il ruolo selezionato non è valido' })
   ruolo!: UserRole;   
 
-  // Campi opzionali, li lascio pronti per quando registrerò i dati specifici del paziente
+  // Campi opzionali, li lascio pronti per quando registrerò i dati specifici del cliente
   @IsOptional()
   @IsString()
   codiceFiscale?: string;

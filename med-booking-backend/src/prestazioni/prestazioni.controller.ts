@@ -18,38 +18,38 @@ export class PrestazioniController {
     return this.prestazioniService.findAll();
   }
 
-  // Endpoint per aggiornare le prestazioni scelte da un medico specifico
-  @Post('aggiorna-medico/:medicoId')
-  async aggiornaPrestazioniMedico(
-    @Param('medicoId') medicoId: string,
+  // Endpoint per aggiornare le prestazioni scelte da un operatore specifico
+  @Post('aggiorna-operatore/:operatoreId')
+  async aggiornaPrestazioniOperatore(
+    @Param('operatoreId') operatoreId: string,
     @Body() body: { prestazioneIds: string[] }
   ) {
-    // Cerco il medico nel DB insieme alle sue vecchie prestazioni
-    const medico = await this.userRepository.findOne({
-        where: { id: medicoId },
+    // Cerco l'operatore nel DB insieme alle sue vecchie prestazioni
+    const operatore = await this.userRepository.findOne({
+        where: { id: operatoreId },
         relations: {
             prestazioni: true
         }
     });
 
-    if (!medico) {
-      return { success: false, message: 'Medico non trovato' };
+    if (!operatore) {
+      return { success: false, message: 'Operatore non trovato' };
     }
 
-    // Se l'array di ID è vuoto, svuoto la lista del medico, altrimenti cerco le entità corrispondenti
+    // Se l'array di ID è vuoto, svuoto la lista dell'operatore, altrimenti cerco le entità corrispondenti
     if (body.prestazioneIds.length === 0) {
-      medico.prestazioni = [];
+      operatore.prestazioni = [];
     } else {
       // Tramite TypeORM cerco tutte le prestazioni incluse nell'elenco di ID inviati dal frontend
-      medico.prestazioni = await this.prestazioniService.findManyByIds(body.prestazioneIds);
+      operatore.prestazioni = await this.prestazioniService.findManyByIds(body.prestazioneIds);
     }
 
-    await this.userRepository.save(medico);
+    await this.userRepository.save(operatore);
 
     return { 
       success: true, 
       message: 'Prestazioni aggiornate con successo!', 
-      user: medico
+      user: operatore
     };
   }
 }

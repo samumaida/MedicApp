@@ -14,7 +14,7 @@ import { PrestazioniService } from '../../services/prestazioni';
   imports: [IonicModule, CommonModule, FormsModule]
 })
 export class PrestazioniPage implements OnInit, OnDestroy {
-  medicoLoggato: any = null;
+  operatoreLoggato: any = null;
   catalogoPrestazioni: any[] = [];
   
   prestazioniSelezionate: { [key: string]: boolean } = {};
@@ -29,8 +29,8 @@ export class PrestazioniPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.authSub = this.authService.currentUser$.subscribe(user => {
-      this.medicoLoggato = user;
-      if (this.medicoLoggato) {
+      this.operatoreLoggato = user;
+      if (this.operatoreLoggato) {
         this.caricaDati();
       }
     });
@@ -51,9 +51,9 @@ export class PrestazioniPage implements OnInit, OnDestroy {
     // Svuoto la mappa precedente
     this.prestazioniSelezionate = {};
     
-    // Se il medico ha già delle prestazioni salvate nel DB, le visualizzo nella mappa
-    if (this.medicoLoggato && this.medicoLoggato.prestazioni) {
-      this.medicoLoggato.prestazioni.forEach((p: any) => {
+    // Se l'operatore ha già delle prestazioni salvate nel DB, le visualizzo nella mappa
+    if (this.operatoreLoggato && this.operatoreLoggato.prestazioni) {
+      this.operatoreLoggato.prestazioni.forEach((p: any) => {
         this.prestazioniSelezionate[p.id] = true;
       });
     }
@@ -66,7 +66,7 @@ export class PrestazioniPage implements OnInit, OnDestroy {
     );
 
     // Invio i dati al backend
-    this.prestazioniService.salvaPrestazioniMedico(this.medicoLoggato.id, idsDaSalvare).subscribe({
+    this.prestazioniService.salvaPrestazioniOperatore(this.operatoreLoggato.id, idsDaSalvare).subscribe({
       next: (res) => {
         if (res.success) {
           this.mostraToast(res.message, 'success');

@@ -15,8 +15,8 @@ export class PrestazioniService {
     return this.http.get<any[]>(this.apiUrl);
   }
 
-  // Invio al backend l'array di ID scelti dal medico
-  salvaPrestazioniMedico(medicoId: string, prestazioneIds: string[]): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/aggiorna-medico/${medicoId}`, { prestazioneIds });
+  // Invio al backend l'array di ID scelti dall'operatore
+  salvaPrestazioniOperatore(operatoreId: string, prestazioneIds: string[]): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/aggiorna-operatore/${operatoreId}`, { prestazioneIds });
   }
 }

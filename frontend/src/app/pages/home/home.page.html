@@ -9,13 +9,13 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div *ngIf="user?.ruolo === 'medico'">
+  <div *ngIf="user?.ruolo === 'operatore'">
     <h2>Benvenuto, {{user?.nome}}</h2>
     <ion-list>
       <ion-list-header><ion-label>Appuntamenti Odierni</ion-label></ion-list-header>
       <ion-item *ngFor="let app of listaAppuntamenti">
         <ion-label>
-          <h3>{{app.pazienteNome}}</h3>
+          <h3>{{app.clienteNome}}</h3>
           <p>{{app.prestazione}} - ore {{app.ora}}</p>
         </ion-label>
         <ion-badge slot="end" [color]="app.stato === 'confermato' ? 'success' 
@@ -28,7 +28,7 @@
     </ion-list>
   </div>
 
-  <div *ngIf="user?.ruolo === 'paziente'">
+  <div *ngIf="user?.ruolo === 'cliente'">
     <h2>I tuoi Referti</h2>
     <ion-card *ngFor="let app of listaAppuntamenti">
       <ion-card-header>
@@ -59,12 +59,12 @@
   <ion-toolbar>
     <ion-tabs>
       <ion-tab-bar slot="bottom">
-        @if (user?.ruolo === 'paziente') {
+        @if (user?.ruolo === 'cliente') {
           <ion-tab-button (click)="navigaA('/prenota-appuntamento')">
             <ion-icon name="add-circle-outline"></ion-icon>
             <ion-label>Prenota</ion-label>
           </ion-tab-button>
-        } @else if (user?.ruolo === 'medico') {
+        } @else if (user?.ruolo === 'operatore') {
           <ion-tab-button (click)="navigaA('/prestazioni')">
             <ion-icon name="add-circle-outline"></ion-icon>
             <ion-label>Prestazioni</ion-label>

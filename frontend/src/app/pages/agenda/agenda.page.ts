@@ -104,7 +104,7 @@ export class AgendaPage implements OnInit {
                 : app.stato === 'rifiutato' ? '#eb445a' 
                   : '#ffc409',
         extendedProps: {
-          pazienteNome: app.pazienteNome,
+          clienteNome: app.clienteNome,
           ora: app.ora,
           data: app.data,
           stato: app.stato
@@ -142,8 +142,8 @@ export class AgendaPage implements OnInit {
 
     // Recupero dello stato
     const statoAttuale = props && props.stato ? props.stato.toUpperCase() : 'IN ATTESA';
-    const pazienteMostrato = props && props.pazienteNome ? props.pazienteNome : 'N/D';
-    const medicoMostrato = this.currentUser?.ruolo === 'medico' ? pazienteMostrato : evento.extendedProps.medicoNome || 'N/D';
+    const clienteMostrato = props && props.clienteNome ? props.clienteNome : 'N/D';
+    const operatoreMostrato = this.currentUser?.ruolo === 'operatore' ? clienteMostrato : evento.extendedProps.operatoreNome || 'N/D';
 
     const bottoniAlert: any[] = [
       {
@@ -153,8 +153,8 @@ export class AgendaPage implements OnInit {
       }
     ];
 
-    // Se l'utente loggato è un 'medico' e l'appuntamento è 'in attesa', aggiungo i comandi di approvazione
-    if (this.currentUser?.ruolo === 'medico' && statoAttuale === 'IN ATTESA') {
+    // Se l'utente loggato è un 'operatore' e l'appuntamento è 'in attesa', aggiungo i comandi di approvazione
+    if (this.currentUser?.ruolo === 'operatore' && statoAttuale === 'IN ATTESA') {
       bottoniAlert.push({
         text: 'Accetta Appuntamento',
         role: 'confirm',
@@ -181,7 +181,7 @@ export class AgendaPage implements OnInit {
 
     const alert = await this.alertCtrl.create({
       header: evento.title,
-      subHeader: this.currentUser?.ruolo === 'medico' ? `Paziente: ${pazienteMostrato}` : `Dottore: ${medicoMostrato}`,
+      subHeader: this.currentUser?.ruolo === 'operatore' ? `Cliente: ${clienteMostrato}` : `Operatore: ${operatoreMostrato}`,
       message: `📅 Giorno: ${dataFormattata}\n\n⏰ Orario: ${orarioMostrato}\n\n📌 Stato: ${statoAttuale.toUpperCase().replace('_', ' ')}`,
       buttons: bottoniAlert
     });

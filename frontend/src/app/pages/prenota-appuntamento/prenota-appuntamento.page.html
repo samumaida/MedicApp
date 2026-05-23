@@ -102,14 +102,14 @@
 
     <p class="ion-padding-horizontal">Data scelta: <b>{{ dataSelezionata | date:'dd/MM/yyyy' }}</b></p>
 
-    <div *ngIf="mediciFiltrati.length === 0" class="ion-padding text-center">
+    <div *ngIf="operatoriFiltrati.length === 0" class="ion-padding text-center">
       <p>Nessun medico disponibile per questa prestazione nel giorno selezionato.</p>
     </div>
 
     <div style="max-width: 800px; margin: 0 auto;">
-      <ion-card *ngFor="let medico of mediciFiltrati">
+      <ion-card *ngFor="let operatore of operatoriFiltrati">
         <ion-card-header>
-          <ion-card-title>{{ medico.nome }}</ion-card-title>
+          <ion-card-title>{{ operatore.nome }}</ion-card-title>
           <ion-card-subtitle>Orari disponibili:</ion-card-subtitle>
         </ion-card-header>
         <ion-card-content>
@@ -117,8 +117,8 @@
             <ion-button 
               size="small" 
               fill="outline" 
-              *ngFor="let ora of medico.orari" 
-              (click)="confermaPrenotazione(medico, ora)">
+              *ngFor="let ora of operatore.orari" 
+              (click)="confermaPrenotazione(operatore, ora)">
               {{ ora }}
             </ion-button>
           </div>
