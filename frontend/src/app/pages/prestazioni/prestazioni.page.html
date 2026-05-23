@@ -13,9 +13,17 @@
     <p>Spunta le prestazioni per renderle visibili ed eseguibili dai tuoi pazienti durante la prenotazione.</p>
   </div>
 
+  <!-- Barra di ricerca -->
+  <ion-searchbar 
+    placeholder="Cerca una prestazione..." 
+    [(ngModel)]="testoCercato" 
+    animated="true"
+    debounce="200">
+  </ion-searchbar>
+
   <!-- Lista del catalogo delle prestazioni -->
   <ion-list lines="inset">
-    <ion-item *ngFor="let prestazione of catalogoPrestazioni">
+    <ion-item *ngFor="let prestazione of prestazioniFiltrate">
       <ion-label>
         <h2><strong>{{ prestazione.nome }}</strong></h2>
         <p>{{ prestazione.descrizione }}</p>
@@ -31,6 +39,10 @@
       </ion-toggle>
     </ion-item>
   </ion-list>
+
+  <div *ngIf="catalogoPrestazioni.length > 0 && prestazioniFiltrate.length === 0" class="ion-text-center ion-padding">
+    <p class="ion-text-color-medium">Nessuna prestazione trovata.</p>
+  </div>
 
   <div *ngIf="catalogoPrestazioni.length === 0" class="ion-text-center ion-padding">
     <ion-spinner name="crescent"></ion-spinner>

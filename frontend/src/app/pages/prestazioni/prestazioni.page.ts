@@ -19,6 +19,8 @@ export class PrestazioniPage implements OnInit, OnDestroy {
   
   prestazioniSelezionate: { [key: string]: boolean } = {};
   
+  testoCercato: string = '';
+
   private authSub!: Subscription;
 
   constructor(
@@ -44,6 +46,19 @@ export class PrestazioniPage implements OnInit, OnDestroy {
         this.mappaPrestazioniAttive();
       },
       error: (err) => this.mostraToast('Errore nel caricamento delle prestazioni', 'danger')
+    });
+  }
+
+  get prestazioniFiltrate(): any[] {
+    if (!this.testoCercato || this.testoCercato.trim() === '') {
+      return this.catalogoPrestazioni;
+    }
+    
+    const query = this.testoCercato.toLowerCase().trim();
+    
+    return this.catalogoPrestazioni.filter(p => {
+      return p.nome.toLowerCase().includes(query) || 
+             (p.descrizione && p.descrizione.toLowerCase().includes(query));
     });
   }
 
