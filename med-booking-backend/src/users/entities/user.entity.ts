@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
-import { Prestazione } from '../../prestazioni/entities/prestazione.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { OperatorePrestazione } from '../../prestazioni/entities/operatore-prestazione.entity';
 
 // Definisco i ruoli possibili con un Enum
 export enum UserRole {
@@ -33,11 +33,6 @@ export class User {
   })
   ruolo!: UserRole;
 
-  @ManyToMany(() => Prestazione, (prestazione) => prestazione.operatori, { cascade: true })
-  @JoinTable({
-    name: 'operatore_prestazioni', // Tabella di giunzione nel DB
-    joinColumn: { name: 'operatore_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'prestazione_id', referencedColumnName: 'id' }
-  })
-  prestazioni!: Prestazione[];
+  @OneToMany(() => OperatorePrestazione, (op) => op.operatore, { cascade: true })
+  operatorePrestazioni!: OperatorePrestazione[];
 }

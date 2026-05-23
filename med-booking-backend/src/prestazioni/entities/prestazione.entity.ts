@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { OperatorePrestazione } from './operatore-prestazione.entity';
 
 @Entity('prestazioni')
 export class Prestazione {
@@ -18,7 +18,6 @@ export class Prestazione {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0.00 })
   prezzo!: number;
 
-  // Rendiamo generica la relazione ManyToMany che punta agli operatori
-  @ManyToMany(() => User, (user) => user.prestazioni)
-  operatori!: User[];
+  @OneToMany(() => OperatorePrestazione, (op) => op.prestazione)
+  operatoriImpostati!: OperatorePrestazione[];
 }

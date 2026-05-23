@@ -22,21 +22,39 @@
   </ion-searchbar>
 
   <!-- Lista del catalogo delle prestazioni -->
-  <ion-list lines="inset">
+  <ion-list lines="inset" *ngIf="catalogoPrestazioni.length > 0">
     <ion-item *ngFor="let prestazione of prestazioniFiltrate">
       <ion-label>
         <h2><strong>{{ prestazione.nome }}</strong></h2>
         <p>{{ prestazione.descrizione }}</p>
+        
+        <!-- Mostro la durata e il prezzo personalizzati presenti nella mappa se attiva, altrimenti quelli di base -->
         <p class="ion-text-color-medium">
-          Durata: {{ prestazione.durataMinuti }} min | Prezzo: {{ prestazione.prezzo }}€
+          Durata: {{ prestazioniSelezionate[prestazione.id]?.durataMinuti }} min | 
+          Prezzo: {{ prestazioniSelezionate[prestazione.id]?.prezzo }}€
         </p>
       </ion-label>
-      
-      <!-- Il toggle si aggancia direttamente alla mappa usando l'ID della prestazione -->
-      <ion-toggle 
-        slot="end" 
-        [(ngModel)]="prestazioniSelezionate[prestazione.id]">
-      </ion-toggle>
+
+      <div slot="end" class="ion-display-flex ion-align-items-center">
+  
+        <!-- BOTTONE MODIFICA -->
+        <ion-button 
+          [disabled]="!prestazioniSelezionate[prestazione.id]?.attiva"
+          fill="solid" 
+          color="light"
+          class="ion-no-margin ion-margin-end"
+          style="--box-shadow: none; --border-radius: 8px; width: 40px; height: 40px;"
+          (click)="apriModalModifica(prestazione)">
+          <ion-icon name="pencil-outline" slot="icon-only" color="primary"></ion-icon>
+        </ion-button>
+        
+        <!-- BOTTONE ATTIVA/DISATTIVA -->
+        <ion-toggle 
+          [(ngModel)]="prestazioniSelezionate[prestazione.id].attiva"
+          (click)="$event.stopPropagation()">
+        </ion-toggle>
+
+      </div>
     </ion-item>
   </ion-list>
 
@@ -48,6 +66,47 @@
     <ion-spinner name="crescent"></ion-spinner>
     <p>Caricamento catalogo...</p>
   </div>
+
+  <!-- Modal per la personalizzazione di Prezzo e Durata -->
+  <ion-modal [isOpen]="isModalOpen" (didDismiss)="annullaModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Personalizza Servizio</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="annullaModal()">Chiudi</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ion-padding" *ngIf="prestazioneInModifica">
+        <h2 class="ion-margin-bottom"><strong>{{ prestazioneInModifica.nome }}</strong></h2>
+        <p>Imposta la tua durata e il prezzo specifico per questa prestazione.</p>
+
+        <ion-item class="ion-margin-top">
+          <ion-input 
+            label="La tua durata (minuti)" 
+            labelPlacement="floating" 
+            type="number" 
+            [(ngModel)]="prestazioneInModifica.durataMinuti">
+          </ion-input>
+        </ion-item>
+
+        <ion-item class="ion-margin-top">
+          <ion-input 
+            label="Il tuo prezzo (€)" 
+            labelPlacement="floating" 
+            type="number" 
+            [(ngModel)]="prestazioneInModifica.prezzo">
+          </ion-input>
+        </ion-item>
+
+        <ion-button expand="block" class="ion-margin-top" (click)="confermaModificaModal()">
+          Conferma Valori
+        </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>
 
 <ion-footer class="ion-no-border">

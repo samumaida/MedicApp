@@ -15,8 +15,10 @@ export class PrestazioniService {
     return this.http.get<any[]>(this.apiUrl);
   }
 
-  // Invio al backend l'array di ID scelti dall'operatore
-  salvaPrestazioniOperatore(operatoreId: string, prestazioneIds: string[]): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/aggiorna-operatore/${operatoreId}`, { prestazioneIds });
+  // Invio al backend le prestazioni scelte dall'operatore comprensive di prezzo e durata personalizzati
+  salvaPrestazioniOperatore(operatoreId: string, prestazioniPersonalizzate: any[]): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/aggiorna-operatore/${operatoreId}`, { 
+      prestazioni: prestazioniPersonalizzate 
+    });
   }
 }
