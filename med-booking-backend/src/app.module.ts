@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { PrestazioniModule } from './prestazioni/prestazioni.module';
+import { AppuntamentiModule } from './appuntamenti/appuntamenti.module';
 
 @Module({
   imports: [
@@ -17,6 +18,9 @@ import { PrestazioniModule } from './prestazioni/prestazioni.module';
     }),
     AuthModule,
     PrestazioniModule,
+    AppuntamentiModule,
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

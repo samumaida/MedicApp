@@ -16,15 +16,32 @@ export class PrestazioniService implements OnModuleInit {
     const count = await this.prestazioneRepository.count();
     if (count === 0) {
       const defaultPrestazioni = [
-        { nome: 'Visita Generale', descrizione: 'Controllo medico di routine', durataMinuti: 30, prezzo: 50.00 },
-        { nome: 'Visita Cardiologica', descrizione: 'Elettrocardiogramma e controllo pressione', durataMinuti: 45, prezzo: 120.00 },
-        { nome: 'Visita Oculistica', descrizione: 'Esame della vista e del fondo oculare', durataMinuti: 30, prezzo: 90.00 },
-        { nome: 'Visita Dermatologica', descrizione: 'Mappatura dei nei e controllo cute', durataMinuti: 30, prezzo: 100.00 },
-        { nome: 'Seduta Fisioterapica', descrizione: 'Riabilitazione e terapia manuale', durataMinuti: 60, prezzo: 70.00 },
-      ];
+      // PEDIATRIA
+      { nome: 'Test DNA Fetale', descrizione: 'Screening prenatale non invasivo del DNA libero.', durataMinuti: 30, prezzo: 400.00, categoriaId: 'pediatria' },
+      { nome: 'Visita Pediatrica di Controllo', descrizione: 'Bilancio di salute e monitoraggio della crescita.', durataMinuti: 45, prezzo: 90.00, categoriaId: 'pediatria' },
+      { nome: 'Ecografia Morfologica', descrizione: 'Controllo ecografico ostetrico dettagliato.', durataMinuti: 60, prezzo: 150.00, categoriaId: 'pediatria' },
+
+      // CARDIOLOGIA
+      { nome: 'Visita Cardiologica con ECG', descrizione: 'Valutazione specialistica con elettrocardiogramma.', durataMinuti: 45, prezzo: 120.00, categoriaId: 'cardiologia' },
+      { nome: 'Ecocardiogramma color doppler', descrizione: 'Ecografia mirata allo studio delle strutture cardiache.', durataMinuti: 30, prezzo: 110.00, categoriaId: 'cardiologia' },
+      { nome: 'Holter Cardiaco 24h', descrizione: 'Monitoraggio continuo del ritmo cardiaco.', durataMinuti: 20, prezzo: 80.00, categoriaId: 'cardiologia' },
+
+      // DIAGNOSTICA
+      { nome: 'Radiografia Toracica (RX)', descrizione: 'Esame radiologico standard del torace.', durataMinuti: 15, prezzo: 40.00, categoriaId: 'diagnostica' },
+      { nome: 'Risonanza Magnetica Nucleare', descrizione: 'Studio ad alta risoluzione dei tessuti molli e articolazioni.', durataMinuti: 45, prezzo: 220.00, categoriaId: 'diagnostica' },
+      { nome: 'Ecografia Addome Completo', descrizione: 'Screening ecografico degli organi addominali.', durataMinuti: 30, prezzo: 90.00, categoriaId: 'diagnostica' },
+
+      // LABORATORIO
+      { nome: 'Esami del Sangue Routine', descrizione: 'Emocromo completo, profilo lipidico e glicemico.', durataMinuti: 10, prezzo: 30.00, categoriaId: 'laboratorio' },
+      { nome: 'Tampone Faringeo Microbiologico', descrizione: 'Ricerca colturale di batteri patogeni respiratori.', durataMinuti: 10, prezzo: 25.00, categoriaId: 'laboratorio' },
+
+      // ORTOPEDIA
+      { nome: 'Visita Ortopedica', descrizione: 'Consulto specialistico per patologie osteo-articolari.', durataMinuti: 30, prezzo: 100.00, categoriaId: 'ortopedia' },
+      { nome: 'Seduta di Fisioterapia', descrizione: 'Trattamento di riabilitazione motoria personalizzato.', durataMinuti: 60, prezzo: 70.00, categoriaId: 'ortopedia' }
+    ];
 
       await this.prestazioneRepository.save(defaultPrestazioni);
-      console.log('🌱 Database Seed: Prestazioni predefinite inserite con successo!');
+      console.debug('🌱 Database Seed: Catalogo esami allineato con successo!');
     }
   }
 

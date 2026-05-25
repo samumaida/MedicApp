@@ -12,6 +12,15 @@
   <!-- SELEZIONE VISITA -->
   <div *ngIf="step === 1">
     <h3 class="ion-padding-horizontal">Seleziona il tipo di visita</h3>
+
+    <ion-searchbar 
+    placeholder="Cerca una visita o un esame..." 
+    [value]="testoCercato"
+    (ionInput)="filtraEsami($event)"
+    animated="true"
+    debounce="100"
+    class="ion-padding-horizontal">
+  </ion-searchbar>
     
     <!-- Ripristiniamo la griglia con i suoi spazi nativi -->
     <ion-grid fixed class="ion-margin-top">
@@ -19,7 +28,7 @@
         <ion-accordion-group style="width: 100%; display: contents;">
           
           <!-- Aggiunto padding orizzontale nativo per separare le colonne da 768px in su -->
-          <ion-col size="12" size-md="6" *ngFor="let cat of categoriePrestazioni" style="display: flex; flex-direction: column;">
+          <ion-col size="12" size-md="6" *ngFor="let cat of categorieFiltrate" style="display: flex; flex-direction: column;">
             
             <!-- Cambiato margin-bottom in una classe e rimosso gli stili che forzavano l'attaccamento -->
             <ion-accordion [value]="cat.id" class="accordion-categoria ion-margin-bottom">
@@ -68,6 +77,10 @@
         </ion-accordion-group>
       </ion-row>
     </ion-grid>
+
+    <div *ngIf="categorieFiltrate.length === 0" class="ion-text-center ion-padding">
+      <p class="ion-text-color-medium">Nessuna prestazione o categoria trovata.</p>
+    </div>
   </div>
 
   <!-- SELEZIONE DATA -->

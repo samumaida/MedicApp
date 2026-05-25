@@ -12,6 +12,9 @@ export class Prestazione {
   @Column({ type: 'text', nullable: true })
   descrizione!: string;
 
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  categoriaId!: string;
+
   @Column({ type: 'int', default: 30 })
   durataMinuti!: number;
 

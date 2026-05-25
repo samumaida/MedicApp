@@ -1,7 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { OperatorePrestazione } from '../../prestazioni/entities/operatore-prestazione.entity';
 
-// Definisco i ruoli possibili con un Enum
 export enum UserRole {
   CLIENTE = 'cliente',
   OPERATORE = 'operatore',
@@ -32,6 +31,12 @@ export class User {
     default: UserRole.CLIENTE,
   })
   ruolo!: UserRole;
+  
+  @Column({ type: 'jsonb', nullable: true })
+  giorniDisponibili?: number[];
+
+  @Column({ type: 'varchar', length: 150, nullable: true })
+  specializzazione?: string;
 
   @OneToMany(() => OperatorePrestazione, (op) => op.operatore, { cascade: true })
   operatorePrestazioni!: OperatorePrestazione[];

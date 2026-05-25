@@ -21,81 +21,8 @@ export class MockDataService {
     { id: 3, clienteNome: 'Luca Verdone', data: '2026-05-18', ora: '15:00', stato: 'completato', prestazione: 'Elettrocardiogramma', refertoUrl: 'referto_3.pdf' }
   ];
 
-  // Lista delle prestazioni disponibili nell'ambulatorio
-  private prestazioni = [
-    { id: 'cardio', nome: 'Visita Cardiologica' },
-    { id: 'derma', nome: 'Visita Dermatologica' },
-    { id: 'ocu', nome: 'Visita Oculistica' }
-  ];
-
   // Lista degli operatori con relativi orari/giorni di disponibilità
-  private operatori = [
-    // CARDIOLOGIA (cardio)
-    { 
-      id: 101, 
-      nome: 'Dott. M. Rossi', 
-      specializzazione: 'cardiologia', 
-      giorniDisponibili: [1, 3, 5], // Lun, Mer, Ven
-      orari: ['09:00', '10:00', '11:00', '12:00'] 
-    },
-    { 
-      id: 102, 
-      nome: 'Dott.ssa A. Bianchi', 
-      specializzazione: 'cardiologia', 
-      giorniDisponibili: [2, 4], // Mar, Gio
-      orari: ['14:30', '15:30', '16:30', '17:30'] 
-    },
-
-    // PEDIATRIA E GINECOLOGIA (pediatria)
-    { 
-      id: 104, 
-      nome: 'Dott.ssa E. Viola', 
-      specializzazione: 'pediatria', 
-      giorniDisponibili: [1, 2, 4], // Lun, Mar, Gio
-      orari: ['08:30', '09:30', '10:30', '11:30'] 
-    },
-    { 
-      id: 105, 
-      nome: 'Dott. F. Neri', 
-      specializzazione: 'pediatria', 
-      giorniDisponibili: [3, 5], // Mer, Ven
-      orari: ['15:00', '16:00', '17:00', '18:00'] 
-    },
-
-    // DIAGNOSTICA PER IMMAGINI / RADIOLOGIA (diagnostica)
-    { 
-      id: 106, 
-      nome: 'Dott.ssa L. Gialli', 
-      specializzazione: 'diagnostica', 
-      giorniDisponibili: [1, 2, 3, 4, 5], // Lun-Ven (Servizio continuo)
-      orari: ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00'] 
-    },
-
-    // ANALISI DI LABORATORIO (laboratorio)
-    { 
-      id: 107, 
-      nome: 'Centro Prelievi (Dott. S. Bruno)', 
-      specializzazione: 'laboratorio', 
-      giorniDisponibili: [1, 2, 3, 4, 5, 6], // Lun-Sab (Incluso sabato mattina per i prelievi)
-      orari: ['07:30', '08:00', '08:30', '09:00', '09:30', '10:00'] 
-    },
-
-    // ORTOPEDIA E FISIATRIA (ortopedia)
-    { 
-      id: 108, 
-      nome: 'Dott. R. Marroni', 
-      specializzazione: 'ortopedia', 
-      giorniDisponibili: [2, 5], // Mar, Ven
-      orari: ['09:00', '10:30', '14:00', '15:30'] 
-    },
-    { 
-      id: 109, 
-      nome: 'Dott.ssa C. Grigio (Fisioterapista)', 
-      specializzazione: 'ortopedia', 
-      giorniDisponibili: [1, 3, 4], // Lun, Mer, Gio
-      orari: ['11:00', '12:00', '16:00', '17:00', '18:00'] 
-    }
-  ];
+  private operatori = [];
 
   constructor() { 
     // Sincronizzo la variabile locale se c'era già un utente salvato
@@ -138,7 +65,6 @@ export class MockDataService {
     return this.appuntamenti; 
   }
 
-  getPrestazioni() { return this.prestazioni; }
   getOperatori() { return this.operatori; }
 
   addAppuntamento(nuovo: Appuntamento) {

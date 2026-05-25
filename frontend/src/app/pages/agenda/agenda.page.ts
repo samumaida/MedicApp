@@ -9,6 +9,8 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { MockDataService } from '../../services/mock-data';
 import { User } from '../../models/user.model';
+import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-agenda',
@@ -71,55 +73,81 @@ export class AgendaPage implements OnInit {
     eventClick: this.handleEventClick.bind(this)
   };
 
-  constructor(private mockService: MockDataService, private alertCtrl: AlertController, private toastCtrl: ToastController) {}
+  constructor(
+    private alertCtrl: AlertController, 
+    private toastCtrl: ToastController,
+    private authService: AuthService,
+    private appuntamentiApiService: AppuntamentiApiService
+  ) {}
 
   ngOnInit() {
-    this.mockService.user$.subscribe(user => {
+    this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
+      if (this.currentUser && this.currentUser.id) {
+        this.caricaAppuntamentiSuCalendario();
+      }
     });
-    this.caricaAppuntamentiSuCalendario();
   }
 
   caricaAppuntamentiSuCalendario() {
-    // Recupero la lista centralizzata
-    const appuntamentiRaw = this.mockService.getAppuntamenti();
+    if (!this.currentUser || !this.currentUser.id) return;
 
-    // Trasformo i dati nel formato accettato da FullCalendar
-    const eventiFormattati = appuntamentiRaw.map(app => {
-      // Unisco 'data' (2026-05-20) e 'ora' (09:00) nel formato ISO richiesto (2026-05-20T09:00:00)
-      const dataInizio = `${app.data}T${app.ora}:00`;
-      
-      // Calcolo un'ora di fine come standard
-      const oreMinuti = app.ora.split(':');
-      const oraFineCorretta = (parseInt(oreMinuti[0]) + 1).toString().padStart(2, '0');
-      const dataFine = `${app.data}T${oraFineCorretta}:${oreMinuti[1]}:00`;
+    // Scelgo dinamicamente il flusso API corretto in base al ruolo dell'utente loggato
+    const rinvioApi$ = this.currentUser.ruolo === 'operatore'
+      ? this.appuntamentiApiService.getAppuntamentiPerOperatore(this.currentUser.id)
+      : this.appuntamentiApiService.getAppuntamentiPerCliente(this.currentUser.id);
 
-      return {
-        id: app.id.toString(),
-        title: app.prestazione,
-        start: dataInizio,
-        end: dataFine,
-        color: app.stato === 'confermato' ? '#2DD55B' 
-                : app.stato === 'completato' ? '#3880ff' 
-                : app.stato === 'rifiutato' ? '#eb445a' 
-                  : '#ffc409',
-        extendedProps: {
-          clienteNome: app.clienteNome,
-          ora: app.ora,
-          data: app.data,
-          stato: app.stato
-        }
-      };
+    // Avvio la richiesta su Postgres
+    rinvioApi$.subscribe({
+      next: (appuntamentiRaw) => {
+        console.log('Dati grezzi ricevuti dal DB per l\'agenda:', appuntamentiRaw);
+        
+        // Trasformo i dati nel formato accettato da FullCalendar
+        const eventiFormattati = appuntamentiRaw.map(app => {
+          const dataInizio = `${app.data}T${app.ora}:00`;
+          
+          const oreMinuti = app.ora.split(':');
+          const oraFineCorretta = (parseInt(oreMinuti[0]) + 1).toString().padStart(2, '0');
+          const dataFine = `${app.data}T${oraFineCorretta}:${oreMinuti[1]}:00`;
+
+          // Se sono il medico voglio vedere il Paziente, se sono il Paziente voglio vedere il Medico
+          const titoloMostrato = this.currentUser?.ruolo === 'operatore'
+            ? `${app.prestazione?.nome} - Paziente: ${app.paziente?.nome} ${app.paziente?.cognome}`
+            : `${app.prestazione?.nome} - Dott. ${app.operatore?.nome} ${app.operatore?.cognome}`;
+
+          return {
+            id: app.id,
+            title: titoloMostrato,
+            start: dataInizio,
+            end: dataFine,
+            color: app.stato === 'confermato' ? '#2dd36f' : '#ffc409',
+
+            extendedProps: {
+              stato: app.stato,
+              ora: app.ora,
+              data: app.data,
+              clienteNome: app.paziente ? `${app.paziente.nome} ${app.paziente.cognome}` : 'N/D',
+              operatoreNome: app.operatore ? `Dott. ${app.operatore.cognome}` : 'N/D'
+            }
+          };
+        });
+
+        console.log('Eventi formattati per FullCalendar:', eventiFormattati);
+        
+        // Aggiorno le opzioni del calendario per mostrare i blocchi visivi completi
+        this.calendarOptions = {
+          ...this.calendarOptions,
+          events: eventiFormattati
+        };
+      },
+      error: (err) => console.error('Errore nel caricamento del calendario:', err)
     });
-
-    // Aggiorno le opzioni del calendario per forzare il rendering dei nuovi dati
-    this.calendarOptions.events = eventiFormattati;
   }
 
   // GESTIONE DEL POPUP DETTAGLI / ELIMINAZIONE
   async handleEventClick(info: any) {
     const evento = info.event;
-    const idAppuntamento = parseInt(evento.id);
+    const idAppuntamento = evento.id; 
     const props = evento.extendedProps;
 
     // Se props.data è undefined, estraggo la data direttamente dall'oggetto 'start' di FullCalendar
@@ -143,7 +171,7 @@ export class AgendaPage implements OnInit {
     // Recupero dello stato
     const statoAttuale = props && props.stato ? props.stato.toUpperCase() : 'IN ATTESA';
     const clienteMostrato = props && props.clienteNome ? props.clienteNome : 'N/D';
-    const operatoreMostrato = this.currentUser?.ruolo === 'operatore' ? clienteMostrato : evento.extendedProps.operatoreNome || 'N/D';
+    const operatoreMostrato = props && props.operatoreNome ? props.operatoreNome : 'N/D';
 
     const bottoniAlert: any[] = [
       {
@@ -182,65 +210,92 @@ export class AgendaPage implements OnInit {
     const alert = await this.alertCtrl.create({
       header: evento.title,
       subHeader: this.currentUser?.ruolo === 'operatore' ? `Cliente: ${clienteMostrato}` : `Operatore: ${operatoreMostrato}`,
-      message: `📅 Giorno: ${dataFormattata}\n\n⏰ Orario: ${orarioMostrato}\n\n📌 Stato: ${statoAttuale.toUpperCase().replace('_', ' ')}`,
+      message: `📅 Giorno: ${dataFormattata}\n\n⏰ Orario: ${orarioMostrato}\n\n📌 Stato: ${statoAttuale.replace('_', ' ')}`,
       buttons: bottoniAlert
     });
 
     await alert.present();
   }
 
-  async cambiaStatoEInforma(id: number, nuovoStato: 'confermato' | 'rifiutato', messaggioToast: string) {
-    // 1. Aggiorna sul servizio mock
-    this.mockService.updateStatoAppuntamento(id, nuovoStato);
-    
-    // 2. Ricarica i dati locali per aggiornare i colori su FullCalendar
-    this.caricaAppuntamentiSuCalendario();
+  cambiaStatoEInforma(id: string, nuovoStato: 'confermato' | 'rifiutato', messaggioToast: string) {
+    this.appuntamentiApiService.patchStatoAppuntamento(id, nuovoStato).subscribe({
+      next: async (res) => {
+        if (res.success) {
+          // Ricarico i dati  da Postgres per aggiornare gli appuntamenti sul calendario
+          this.caricaAppuntamentiSuCalendario();
 
-    // 3. Mostra la notifica di successo
-    const toast = await this.toastCtrl.create({
-      message: messaggioToast,
-      duration: 2500,
-      color: nuovoStato === 'confermato' ? 'success' : 'warning',
-      position: 'bottom'
+          const toast = await this.toastCtrl.create({
+            message: messaggioToast,
+            duration: 2500,
+            color: nuovoStato === 'confermato' ? 'success' : 'warning',
+            position: 'bottom'
+          });
+          await toast.present();
+        }
+      },
+      error: async (err) => {
+        console.error("Errore durante l'aggiornamento dello stato:", err);
+        const toast = await this.toastCtrl.create({
+          message: "Impossibile aggiornare l'appuntamento sul server.",
+          duration: 3000,
+          color: 'danger',
+          position: 'bottom'
+        });
+        await toast.present();
+      }
     });
-    await toast.present();
   }
 
-async mostraConfermaCancellazione(id: number) {
-  const alertConferma = await this.alertCtrl.create({
-    header: 'Sei sicuro?',
-    message: 'Vuoi davvero cancellare questo appuntamento? L\'azione non è reversibile.',
-    buttons: [
-      {
-        text: 'Annulla',
-        role: 'cancel',
-        cssClass: 'secondary'
-      },
-      {
-        text: 'Sì, Elimina',
-        role: 'destructive',
-        handler: () => {
-          this.cancellaAppuntamento(id);
+  async mostraConfermaCancellazione(id: string) {
+    const alertConferma = await this.alertCtrl.create({
+      header: 'Sei sicuro?',
+      message: 'Vuoi davvero cancellare questo appuntamento? L\'azione non è reversibile.',
+      buttons: [
+        {
+          text: 'Annulla',
+          role: 'cancel',
+          cssClass: 'secondary'
+        },
+        {
+          text: 'Sì, Elimina',
+          role: 'destructive',
+          handler: () => {
+            this.cancellaAppuntamento(id);
+          }
         }
-      }
-    ]
-  });
-
-  await alertConferma.present();
-}
-
-  async cancellaAppuntamento(id: number) {
-    this.mockService.removeAppuntamento(id);
-
-    this.caricaAppuntamentiSuCalendario();
-
-    const toast = await this.toastCtrl.create({
-      message: 'Appuntamento cancellato con successo.',
-      duration: 2500,
-      color: 'success',
-      position: 'bottom'
+      ]
     });
-    await toast.present();
+
+    await alertConferma.present();
+  }
+
+  cancellaAppuntamento(id: string) {
+    this.appuntamentiApiService.eliminaAppuntamento(id).subscribe({
+      next: async (res) => {
+        if (res.success) {
+          // Ricarico i dati aggiornati da Postgres per rimuovere il blocco visivo dal calendario
+          this.caricaAppuntamentiSuCalendario();
+
+          const toast = await this.toastCtrl.create({
+            message: 'Appuntamento cancellato con successo.',
+            duration: 2500,
+            color: 'success',
+            position: 'bottom'
+          });
+          await toast.present();
+        }
+      },
+      error: async (err) => {
+        console.error("Errore durante l'eliminazione dell'appuntamento:", err);
+        const toast = await this.toastCtrl.create({
+          message: "Impossibile cancellare l'appuntamento dal server.",
+          duration: 3000,
+          color: 'danger',
+          position: 'bottom'
+        });
+        await toast.present();
+      }
+    });
   }
 
   getInitialView() {

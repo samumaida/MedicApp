@@ -5,20 +5,24 @@ import { Router } from '@angular/router';
 import { MockDataService } from '../../services/mock-data';
 import { addIcons } from 'ionicons';
 import { medicalOutline, chevronForwardOutline, arrowBackOutline } from 'ionicons/icons';
-import { User, Appuntamento } from '../../models/user.model';
 import { Prestazione } from '../../models/reservations.model';
+import { FormsModule } from '@angular/forms';
+import { PrestazioniApiService } from '../../services/prestazioni-api.service';
+import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
+import { AuthService } from '../../services/auth';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-prenota-appuntamento',
   templateUrl: './prenota-appuntamento.page.html',
   styleUrls: ['./prenota-appuntamento.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule]
+  imports: [IonicModule, CommonModule, FormsModule]
 })
 export class PrenotaAppuntamentoPage implements OnInit {
   step: number = 1;
   
-  listaPrestazioni: any[] = [];
+  listaPrestazioni: Prestazione[] = [];
   operatoriFiltrati: any[] = [];
   
   prestazioneScelta: Prestazione | null = null;
@@ -26,18 +30,84 @@ export class PrenotaAppuntamentoPage implements OnInit {
   dataMinima: string = new Date().toISOString().split('T')[0]; // Impedisce date passate
 
   categoriaSelezionataId: string = '';
+  testoCercato: string = '';
+  categorieFiltrate: any[] = [];
+
+  categoriePrestazioni: any[] = [
+    { id: 'pediatria', nome: 'Pediatria e Ginecologia', immagine: 'assets/images/categories/pediatria.png', prestazioni: [] },
+    { id: 'cardiologia', nome: 'Cardiologia', immagine: 'assets/images/categories/cardiologia.png', prestazioni: [] },
+    { id: 'diagnostica', nome: 'Diagnostica per Immagini', immagine: 'assets/images/categories/radiologia.png', prestazioni: [] },
+    { id: 'laboratorio', nome: 'Analisi di Laboratorio', immagine: 'assets/images/categories/laboratorio.png', prestazioni: [] },
+    { id: 'ortopedia', nome: 'Ortopedia e Fisiatria', immagine: 'assets/images/categories/ortopedia.png', prestazioni: [] }
+  ];
 
   constructor(
     private mockService: MockDataService, 
+    private authService: AuthService,
     private router: Router,
-    private toastCtrl: ToastController
+    private toastCtrl: ToastController,
+    private prestazioniApiService: PrestazioniApiService,
+    private appuntamentiApiService: AppuntamentiApiService,
   ) {
     addIcons({ medicalOutline, chevronForwardOutline, arrowBackOutline });
   }
 
   ngOnInit() {
-    this.listaPrestazioni = this.mockService.getPrestazioni();
+    this.caricaPrestazioniDalDb();
+    this.categorieFiltrate = [...this.categoriePrestazioni];
   }
+
+  caricaPrestazioniDalDb() {
+    this.prestazioniApiService.getPrestazioniDalDb().subscribe({
+      next: (esamiDaDb: Prestazione[]) => {
+        this.listaPrestazioni = esamiDaDb;
+
+        // Pulisco i vecchi dati finti dalle categorie grafiche
+        this.categoriePrestazioni.forEach(cat => cat.prestazioni = []);
+
+        // Carico gli esami nelle categorie
+        esamiDaDb.forEach(esame => {
+          const categoria = this.categoriePrestazioni.find(cat => cat.id === esame.categoriaId);
+          if (categoria) {
+            categoria.prestazioni.push(esame);
+          }
+        });
+
+        // Aggiorno la vista
+        this.categorieFiltrate = [...this.categoriePrestazioni];
+      },
+      error: (err) => {
+        console.error('Errore durante il recupero dei dati dal backend:', err);
+      }
+    });
+  }
+
+  filtraEsami(event: any) {
+  const query = (event.target.value || '').toLowerCase().trim();
+  this.testoCercato = query;
+
+  if (!query) {
+    // Se la barra è vuota, mostro tutto l'array originale
+    this.categorieFiltrate = [...this.categoriePrestazioni];
+    return;
+  }
+
+  // Eseguo il filtro di ricerca
+  this.categorieFiltrate = this.categoriePrestazioni
+    .map(cat => {
+      if (cat.nome.toLowerCase().includes(query)) {
+        return cat;
+      }
+
+      const esamiFiltrati = cat.prestazioni.filter((p: any) => 
+        p.nome.toLowerCase().includes(query) || 
+        (p.descrizione && p.descrizione.toLowerCase().includes(query))
+      );
+
+      return { ...cat, prestazioni: esamiFiltrati };
+    })
+    .filter(cat => cat.prestazioni.length > 0);
+}
 
   selezionaPrestazione(prestazione: Prestazione, categoriaId: string): void {
     this.prestazioneScelta = prestazione;
@@ -53,23 +123,29 @@ export class PrenotaAppuntamentoPage implements OnInit {
     let giornoSettimana = dataObj.getDay(); 
     if (giornoSettimana === 0) giornoSettimana = 7; // Adatto domenica = 7
 
-    // 1. Recuperiamo tutti gli operatori dal service
-    const tuttiGliOperatori = this.mockService.getOperatori();
+    if (!this.prestazioneScelta || !this.categoriaSelezionataId) {
+      console.error('Mancano i dati della prestazione o della categoria.');
+      return;
+    }
 
-    // 2. Troviamo la categoria di appartenenza della prestazione.
-    // Se l'oggetto 'prestazioneScelta' ha già al suo interno l'id della categoria (es. prestazioneScelta.categoriaId), usa quello!
-    // Altrimenti, se ha una proprietà stringa, usiamo quella. Ipotizziamo si chiami 'categoriaId':
-    const categoriaDaFiltrare = this.categoriaSelezionataId;
-
-    // 3. Applichiamo il filtro corretto
-    this.operatoriFiltrati = tuttiGliOperatori.filter(operatore => 
-      operatore.specializzazione === categoriaDaFiltrare &&
-      operatore.giorniDisponibili.includes(giornoSettimana)
-    );
-
-    console.log('Operatori trovati per questo giorno:', this.operatoriFiltrati);
-
-    this.step = 3;
+    // Applico il filtro corretto
+    this.appuntamentiApiService.getOperatoriDisponibili(
+      this.categoriaSelezionataId,
+      giornoSettimana,
+      String(this.prestazioneScelta.id)
+    ).subscribe({
+      next: (operatori: any[]) => {
+        // Postgres restituisce già solo i medici compatibili, attivi e con prezzi/durate corretti
+        this.operatoriFiltrati = operatori;
+        
+        console.debug('Operatori trovati sul DB per questo giorno:', this.operatoriFiltrati);
+        
+        this.step = 3;
+      },
+      error: (err: any) => {
+        console.error('Errore durante il recupero dei medici dal DB:', err);
+      }
+    });
   }
 
   indietro(targetStep: number) {
@@ -77,78 +153,59 @@ export class PrenotaAppuntamentoPage implements OnInit {
   }
 
   async confermaPrenotazione(operatore: any, ora: string) {
-    const utenteCorrente = this.mockService.getCurrentUser();
+    // Recupero l'utente loggato
+    const utenteCorrente = await firstValueFrom(this.authService.currentUser$);
+    
+    if (!utenteCorrente || !utenteCorrente.id) {
+      const toast = await this.toastCtrl.create({
+        message: 'Devi essere autenticato per poter prenotare un appuntamento.',
+        duration: 3000,
+        color: 'danger',
+        position: 'bottom'
+      });
+      await toast.present();
+      return;
+    }
 
-    const nuovoApp: Appuntamento = {
-      id: Math.floor(Math.random() * 1000), // Creo un ID provvisorio dal timestamp
-      clienteNome: utenteCorrente?.nome + ' ' + utenteCorrente?.cognome,
+    if (!this.prestazioneScelta) {
+      console.error('Nessuna prestazione selezionata.');
+      return;
+    }
+
+    // Preparo il payload sull'interfaccia DTO del backend
+    const payload = {
       data: this.dataSelezionata,
       ora: ora,
-      stato: 'in attesa',
-      prestazione: this.prestazioneScelta?.nome ?? ''
+      clienteId: utenteCorrente.id,
+      operatoreId: operatore.id,
+      prestazioneId: this.prestazioneScelta.id,
+      note: ''
     };
 
-    this.mockService.addAppuntamento(nuovoApp);
+    this.appuntamentiApiService.inviaPrenotazione(payload).subscribe({
+      next: async (res) => {
+        if (res.success) {
+          const toast = await this.toastCtrl.create({
+            message: `Appuntamento richiesto con successo. In attesa di approvazione del medico.`,
+            duration: 3500,
+            color: 'success',
+            position: 'bottom'
+          });
+          await toast.present();
 
-    const toast = await this.toastCtrl.create({
-      message: `Appuntamento richiesto con il ${operatore.nome}. Riceverai una mail di conferma appena sarà approvato dal medico.`,
-      duration: 3000,
-      color: 'success',
-      position: 'bottom'
+          this.router.navigate(['/home']);
+        }
+      },
+      error: async (err) => {
+        console.error('Errore durante la prenotazione:', err);
+        const toast = await this.toastCtrl.create({
+          message: 'Impossibile completare la prenotazione. Riprova più tardi.',
+          duration: 3000,
+          color: 'danger',
+          position: 'bottom'
+        });
+        await toast.present();
+      }
     });
-    await toast.present();
-
-    this.router.navigate(['/home']);
   }
-
-  categoriePrestazioni = [
-    {
-      id: 'pediatria',
-      nome: 'Pediatria e Ginecologia',
-      immagine: 'assets/images/categories/pediatria.png', // Sostituisci con i tuoi percorsi reali
-      prestazioni: [
-        { id: 1, nome: 'Test DNA Fetale', descrizione: 'Screening prenatale non invasivo del DNA libero.' },
-        { id: 2, nome: 'Visita Pediatrica di Controllo', descrizione: 'Bilancio di salute e monitoraggio della crescita.' },
-        { id: 3, nome: 'Ecografia Morfologica', descrizione: 'Controllo ecografico ostetrico dettagliato.' }
-      ]
-    },
-    {
-      id: 'cardiologia',
-      nome: 'Cardiologia',
-      immagine: 'assets/images/categories/cardiologia.png',
-      prestazioni: [
-        { id: 4, nome: 'Visita Cardiologica con ECG', descrizione: 'Valutazione specialistica con elettrocardiogramma.' },
-        { id: 5, nome: 'Ecocardiogramma color doppler', description: 'Ecografia mirata allo studio delle strutture cardiache.' },
-        { id: 6, nome: 'Holter Cardiaco 24h', descrizione: 'Monitoraggio continuo del ritmo cardiaco.' }
-      ]
-    },
-    {
-      id: 'diagnostica',
-      nome: 'Diagnostica per Immagini',
-      immagine: 'assets/images/categories/radiologia.png',
-      prestazioni: [
-        { id: 7, nome: 'Radiografia Toracica (RX)', descrizione: 'Esame radiologico standard del torace.' },
-        { id: 8, nome: 'Ronanza Magnetica Nucleare', descrizione: 'Studio ad alta risoluzione dei tessuti molli e articolazioni.' },
-        { id: 9, nome: 'Ecografia Addome Completo', descrizione: 'Screening ecografico degli organi addominali.' }
-      ]
-    },
-    {
-      id: 'laboratorio',
-      nome: 'Analisi di Laboratorio',
-      immagine: 'assets/images/categories/laboratorio.png',
-      prestazioni: [
-        { id: 10, nome: 'Esami del Sangue Routine', descrizione: 'Emocromo completo, profilo lipidico e glicemico.' },
-        { id: 11, nome: 'Tampone Faringeo Microbiologico', descrizione: 'Ricerca colturale di batteri patogeni respiratori.' }
-      ]
-    },
-    {
-      id: 'ortopedia',
-      nome: 'Ortopedia e Fisiatria',
-      immagine: 'assets/images/categories/ortopedia.png',
-      prestazioni: [
-        { id: 12, nome: 'Visita Ortopedica', descrizione: 'Consulto specialistico per patologie osteo-articolari.' },
-        { id: 13, nome: 'Seduta di Fisioterapia', descrizione: 'Trattamento di riabilitazione motoria personalizzato.' }
-      ]
-    }
-  ];
 }
