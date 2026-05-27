@@ -17,14 +17,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(reqConToken).pipe(
     catchError((errore: HttpErrorResponse) => {
-      // Se il server risponde con 401, il token è scaduto o non valido
+      // Se il token è scaduto o non valido effettuo il logout
       if (errore.status === 401) {
         console.warn('Token scaduto o non valido. Reindirizzamento al login.');
         authService.logout();
         router.navigate(['/login']);
       }
 
-      // Rilancio l'errore per permettere agli handler locali di gestirlo
       return throwError(() => errore);
     })
   );

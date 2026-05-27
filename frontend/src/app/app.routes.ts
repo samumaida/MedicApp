@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
+import { unsavedChangesGuard } from './guards/unsaved-changes.guard';
 
 export const routes: Routes = [
   {
@@ -28,7 +29,8 @@ export const routes: Routes = [
   },
   {
     path: 'prestazioni',
-    loadComponent: () => import('./pages/prestazioni/prestazioni.page').then( m => m.PrestazioniPage)
+    loadComponent: () => import('./pages/prestazioni/prestazioni.page').then( m => m.PrestazioniPage),
+    canDeactivate: [unsavedChangesGuard]
   },
   {
     path: 'profilo',

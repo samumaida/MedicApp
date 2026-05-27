@@ -5,6 +5,7 @@ import { IonicModule, ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { PrestazioniService } from '../../services/prestazioni';
+import { PaginaConModifiche } from '../../guards/unsaved-changes.guard';
 import { addIcons } from 'ionicons';
 import { pencilOutline } from 'ionicons/icons';
 
@@ -15,15 +16,17 @@ import { pencilOutline } from 'ionicons/icons';
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })
-export class PrestazioniPage implements OnInit, OnDestroy {
+export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
   operatoreLoggato: any = null;
   catalogoPrestazioni: any[] = [];
-  
+
   prestazioniSelezionate: { [key: string]: { attiva: boolean; durataMinuti: number; prezzo: number } } = {};
-  
+
   testoCercato: string = '';
   isModalOpen = false;
   prestazioneInModifica: any = null;
+
+  modificheNonSalvate = false;
 
   private authSub!: Subscription;
 
@@ -112,6 +115,16 @@ export class PrestazioniPage implements OnInit, OnDestroy {
     this.isModalOpen = true;
   }
 
+  // Metodo usato dal guard di navigazione per verificare se ci sono modifiche non salvate
+  haModificheNonSalvate(): boolean {
+    return this.modificheNonSalvate;
+  }
+
+  // Chiamato dal template quando l'utente attiva/disattiva un toggle
+  onToggleModifica() {
+    this.modificheNonSalvate = true;
+  }
+
   confermaModificaModal() {
     if (this.prestazioneInModifica) {
       const id = this.prestazioneInModifica.id;
@@ -119,6 +132,8 @@ export class PrestazioniPage implements OnInit, OnDestroy {
       // Salvo i valori personalizzati nella mappa
       this.prestazioniSelezionate[id].durataMinuti = this.prestazioneInModifica.durataMinuti;
       this.prestazioniSelezionate[id].prezzo = this.prestazioneInModifica.prezzo;
+
+      this.modificheNonSalvate = true;
     }
 
     this.isModalOpen = false;
@@ -144,6 +159,7 @@ export class PrestazioniPage implements OnInit, OnDestroy {
     this.prestazioniService.salvaPrestazioniOperatore(this.operatoreLoggato.id, datiDaSalvare).subscribe({
       next: (res) => {
         if (res.success) {
+          this.modificheNonSalvate = false;
           this.mostraToast(res.message, 'success');
           this.authService.aggiornaStatoUtente(res.user);
         }

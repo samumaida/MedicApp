@@ -87,10 +87,10 @@ export class PrestazioniController {
       }
     });
 
-    return { 
-      success: true, 
-      message: 'Prestazioni aggiornate con successo!', 
-      user: operatore
+    return {
+      success: true,
+      message: 'Prestazioni aggiornate con successo!',
+      user: operatoreAggiornato
     };
   }
 

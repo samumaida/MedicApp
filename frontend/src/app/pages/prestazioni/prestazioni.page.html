@@ -49,8 +49,9 @@
         </ion-button>
         
         <!-- BOTTONE ATTIVA/DISATTIVA -->
-        <ion-toggle 
+        <ion-toggle
           [(ngModel)]="prestazioniSelezionate[prestazione.id].attiva"
+          (ionChange)="onToggleModifica()"
           (click)="$event.stopPropagation()">
         </ion-toggle>
 

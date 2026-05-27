@@ -86,9 +86,10 @@ export class AuthService {
   async login(loginAuthDto: LoginAuthDto) {
     const { email, password } = loginAuthDto;
 
-    // Cerco l'utente sul database tramite la mail
-    const utente = await this.userRepository.findOne({ 
-      where: { email }
+    // Cerco l'utente sul database tramite la mail, caricando anche le sue prestazioni abilitate
+    const utente = await this.userRepository.findOne({
+      where: { email },
+      relations: { operatorePrestazioni: { prestazione: true } }
     });
 
     if (!utente) {
@@ -121,7 +122,8 @@ export class AuthService {
         nome: utente.nome,
         cognome: utente.cognome,
         email: utente.email,
-        ruolo: utente.ruolo
+        ruolo: utente.ruolo,
+        operatorePrestazioni: utente.operatorePrestazioni || []
       }
     };
   }
