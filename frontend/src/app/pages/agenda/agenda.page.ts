@@ -1,7 +1,8 @@
 import { Component, OnInit, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController, ToastController } from '@ionic/angular';
+import { IonicModule, ModalController, ToastController } from '@ionic/angular';
+import { AppuntamentoDetailComponent } from '../../components/appuntamento-detail/appuntamento-detail.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { FullCalendarComponent } from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -18,9 +19,10 @@ import { AuthService } from '../../services/auth';
   standalone: true,
   imports: [
     IonicModule,
-    CommonModule, 
-    FormsModule, 
-    FullCalendarModule
+    CommonModule,
+    FormsModule,
+    FullCalendarModule,
+    AppuntamentoDetailComponent
   ]
 })
 
@@ -73,7 +75,7 @@ export class AgendaPage implements OnInit {
   };
 
   constructor(
-    private alertCtrl: AlertController, 
+    private modalCtrl: ModalController,
     private toastCtrl: ToastController,
     private authService: AuthService,
     private appuntamentiApiService: AppuntamentiApiService
@@ -111,7 +113,7 @@ export class AgendaPage implements OnInit {
 
           // Se sono il medico voglio vedere il Paziente, se sono il Paziente voglio vedere il Medico
           const titoloMostrato = this.currentUser?.ruolo === 'operatore'
-            ? `${app.prestazione?.nome} - Paziente: ${app.paziente?.nome} ${app.paziente?.cognome}`
+            ? `${app.prestazione?.nome} - Paziente: ${app.cliente?.nome} ${app.cliente?.cognome}`
             : `${app.prestazione?.nome} - Dott. ${app.operatore?.nome} ${app.operatore?.cognome}`;
 
           return {
@@ -125,7 +127,7 @@ export class AgendaPage implements OnInit {
               stato: app.stato,
               ora: app.ora,
               data: app.data,
-              clienteNome: app.paziente ? `${app.paziente.nome} ${app.paziente.cognome}` : 'N/D',
+              clienteNome: app.cliente ? `${app.cliente.nome} ${app.cliente.cognome}` : 'N/D',
               operatoreNome: app.operatore ? `Dott. ${app.operatore.cognome}` : 'N/D'
             }
           };
@@ -143,77 +145,44 @@ export class AgendaPage implements OnInit {
     });
   }
 
-  // GESTIONE DEL POPUP DETTAGLI / ELIMINAZIONE
+  // Apre la modal di dettaglio al click su un evento del calendario
   async handleEventClick(info: any) {
     const evento = info.event;
-    const idAppuntamento = evento.id; 
     const props = evento.extendedProps;
 
-    // Se props.data è undefined, estraggo la data direttamente dall'oggetto 'start' di FullCalendar
-    let dataFormattata = '';
-    if (props && props.data) {
-      dataFormattata = props.data.split('-').reverse().join('/');
-    } else if (evento.start) {
-      // Formatto la data nativa (Date object) in GG/MM/AAAA
-      const d = evento.start;
-      dataFormattata = `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
-    }
+    // Ricostruisco l'oggetto appuntamento nel formato atteso dalla modal
+    const appuntamento = {
+      id: evento.id,
+      stato: props.stato || 'in attesa',
+      data: props.data || evento.start?.toISOString().split('T')[0],
+      ora: props.ora || `${evento.start?.getHours().toString().padStart(2, '0')}:${evento.start?.getMinutes().toString().padStart(2, '0')}`,
+      prestazione: { nome: evento.title?.split(' - ')[0] },
+      cliente: { nome: props.clienteNome || '', cognome: '' },
+      operatore: { nome: props.operatoreNome || '', cognome: '' }
+    };
 
-    // Recupero dell'orario
-    let orarioMostrato = '';
-    if (props && props.ora) {
-      orarioMostrato = props.ora;
-    } else if (evento.start) {
-      orarioMostrato = `${evento.start.getHours().toString().padStart(2, '0')}:${evento.start.getMinutes().toString().padStart(2, '0')}`;
-    }
-
-    // Recupero dello stato
-    const statoAttuale = props && props.stato ? props.stato.toUpperCase() : 'IN ATTESA';
-    const clienteMostrato = props && props.clienteNome ? props.clienteNome : 'N/D';
-    const operatoreMostrato = props && props.operatoreNome ? props.operatoreNome : 'N/D';
-
-    const bottoniAlert: any[] = [
-      {
-        text: 'Chiudi',
-        role: 'cancel',
-        cssClass: 'secondary'
-      }
-    ];
-
-    // Se l'utente loggato è un 'operatore' e l'appuntamento è 'in attesa', aggiungo i comandi di approvazione
-    if (this.currentUser?.ruolo === 'operatore' && statoAttuale === 'IN ATTESA') {
-      bottoniAlert.push({
-        text: 'Accetta Appuntamento',
-        role: 'confirm',
-        handler: () => {
-          this.cambiaStatoEInforma(idAppuntamento, 'confermato', 'Appuntamento approvato e inserito in agenda.');
-        }
-      });
-      
-      bottoniAlert.push({
-        text: 'Rifiuta',
-        handler: () => {
-          this.cambiaStatoEInforma(idAppuntamento, 'rifiutato', 'Appuntamento rifiutato.');
-        }
-      });
-    }
-
-    bottoniAlert.push({
-      text: 'Elimina Prenotazione',
-      role: 'destructive',
-      handler: () => {
-        this.mostraConfermaCancellazione(idAppuntamento);
-      }
+    const modal = await this.modalCtrl.create({
+      component: AppuntamentoDetailComponent,
+      componentProps: {
+        appuntamento,
+        ruoloUtente: this.currentUser?.ruolo
+      },
+      breakpoints: [0, 0.75, 1],
+      initialBreakpoint: 0.75
     });
 
-    const alert = await this.alertCtrl.create({
-      header: evento.title,
-      subHeader: this.currentUser?.ruolo === 'operatore' ? `Cliente: ${clienteMostrato}` : `Operatore: ${operatoreMostrato}`,
-      message: `📅 Giorno: ${dataFormattata}\n\n⏰ Orario: ${orarioMostrato}\n\n📌 Stato: ${statoAttuale.replace('_', ' ')}`,
-      buttons: bottoniAlert
-    });
+    await modal.present();
 
-    await alert.present();
+    const { data } = await modal.onDidDismiss();
+    if (!data) return;
+
+    if (data.azione === 'conferma') {
+      this.cambiaStatoEInforma(data.id, 'confermato', 'Appuntamento approvato e inserito in agenda.');
+    } else if (data.azione === 'rifiuta') {
+      this.cambiaStatoEInforma(data.id, 'rifiutato', 'Appuntamento rifiutato.');
+    } else if (data.azione === 'elimina') {
+      this.mostraConfermaCancellazione(data.id);
+    }
   }
 
   cambiaStatoEInforma(id: string, nuovoStato: 'confermato' | 'rifiutato', messaggioToast: string) {
@@ -246,26 +215,7 @@ export class AgendaPage implements OnInit {
   }
 
   async mostraConfermaCancellazione(id: string) {
-    const alertConferma = await this.alertCtrl.create({
-      header: 'Sei sicuro?',
-      message: 'Vuoi davvero cancellare questo appuntamento? L\'azione non è reversibile.',
-      buttons: [
-        {
-          text: 'Annulla',
-          role: 'cancel',
-          cssClass: 'secondary'
-        },
-        {
-          text: 'Sì, Elimina',
-          role: 'destructive',
-          handler: () => {
-            this.cancellaAppuntamento(id);
-          }
-        }
-      ]
-    });
-
-    await alertConferma.present();
+    this.cancellaAppuntamento(id);
   }
 
   cancellaAppuntamento(id: string) {

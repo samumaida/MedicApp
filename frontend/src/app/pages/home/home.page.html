@@ -9,49 +9,144 @@
 </ion-header>
 
 <ion-content class="ion-padding">
-  <div>
-    <h2>Benvenuto, {{user?.nome}}</h2>
-    <ion-list>
-      <ion-list-header><ion-label>Appuntamenti Odierni</ion-label></ion-list-header>
-      <ion-item-divider/>
+  <h2>Benvenuto, {{ user?.nome }}</h2>
+
+  <!-- OPERATORE -->
+  <ng-container *ngIf="user?.ruolo === 'operatore'">
+
+    <h3 class="ion-margin-top">I tuoi appuntamenti</h3>
+
+    <!-- Sezioni a tendina per appuntamenti -->
+    <ion-accordion-group [multiple]="true" value="da-confermare">
+
+      <!-- Da confermare -->
+      <ion-accordion value="da-confermare">
+        <ion-item slot="header" color="light">
+          <ion-label><strong>Da confermare</strong></ion-label>
+          <ion-badge slot="end" color="warning" *ngIf="daConfermare.length > 0" style="margin-right: 8px;">
+            {{ daConfermare.length }}
+          </ion-badge>
+          <span slot="end" *ngIf="daConfermare.length === 0"
+            style="font-size: 0.9rem; color: var(--ion-color-medium); margin-right: 8px;">0</span>
+        </ion-item>
+        <div slot="content">
+          <ion-list lines="inset" *ngIf="daConfermare.length > 0; else nessunoDaConfermare">
+            <ion-item button *ngFor="let app of daConfermare" (click)="apriDettaglio(app)">
+              <ion-icon
+                *ngIf="isOggi(app.data)"
+                name="alert-circle-outline"
+                slot="start"
+                color="warning">
+              </ion-icon>
+              <ion-label>
+                <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
+                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
+              </ion-label>
+              <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+            </ion-item>
+          </ion-list>
+          <ng-template #nessunoDaConfermare>
+            <ion-item lines="none">
+              <ion-label color="medium">Nessun appuntamento in attesa di conferma.</ion-label>
+            </ion-item>
+          </ng-template>
+        </div>
+      </ion-accordion>
+
+      <!-- Confermati -->
+      <ion-accordion value="confermati">
+        <ion-item slot="header" color="light">
+          <ion-label><strong>Confermati</strong></ion-label>
+          <span slot="end" style="font-size: 0.9rem; color: var(--ion-color-medium); margin-right: 8px;">
+            {{ confermati.length }}
+          </span>
+        </ion-item>
+        <div slot="content">
+          <ion-list lines="inset" *ngIf="confermati.length > 0; else nessunoConfermato">
+            <ion-item button *ngFor="let app of confermati" (click)="apriDettaglio(app)">
+              <ion-label>
+                <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
+                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
+              </ion-label>
+              <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+            </ion-item>
+          </ion-list>
+          <ng-template #nessunoConfermato>
+            <ion-item lines="none">
+              <ion-label color="medium">Nessun appuntamento confermato.</ion-label>
+            </ion-item>
+          </ng-template>
+        </div>
+      </ion-accordion>
+
+      <!-- Completati -->
+      <ion-accordion value="completati">
+        <ion-item slot="header" color="light">
+          <ion-label><strong>Completati</strong></ion-label>
+          <span slot="end" style="font-size: 0.9rem; color: var(--ion-color-medium); margin-right: 8px;">
+            {{ completati.length }}
+          </span>
+        </ion-item>
+        <div slot="content">
+          <ion-list lines="inset" *ngIf="completati.length > 0; else nessunoCompletato">
+            <ion-item button *ngFor="let app of completati" (click)="apriDettaglio(app)">
+              <ion-label>
+                <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
+                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
+              </ion-label>
+              <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+            </ion-item>
+          </ion-list>
+          <ng-template #nessunoCompletato>
+            <ion-item lines="none">
+              <ion-label color="medium">Nessuna visita completata.</ion-label>
+            </ion-item>
+          </ng-template>
+        </div>
+      </ion-accordion>
+
+    </ion-accordion-group>
+
+  </ng-container>
+
+  <!-- CLIENTE -->
+  <ng-container *ngIf="user?.ruolo === 'cliente'">
+
+    <h3 class="ion-margin-top">I tuoi appuntamenti</h3>
+    <ion-list lines="inset">
       <ion-item *ngIf="listaAppuntamenti.length === 0">
-        <ion-label>Nessun appuntamento per oggi</ion-label>
+        <ion-label>Nessun appuntamento trovato</ion-label>
       </ion-item>
       <ion-item *ngFor="let app of listaAppuntamenti">
         <ion-label>
-          <h3>{{app.cliente?.nome}} {{app.cliente?.cognome}}</h3>
-          <p>{{app.prestazione?.descrizione}} - ore {{app.ora}}</p>
+          <h3>{{ app.prestazione?.nome }}</h3>
+          <p>Dott. {{ app.operatore?.nome }} {{ app.operatore?.cognome }} — {{ app.data }} ore {{ app.ora }}</p>
         </ion-label>
-        <ion-badge slot="end" [color]="app.stato === 'confermato' ? 'success' 
-                               : app.stato === 'completato' ? 'primary' 
-                                : app.stato === 'rifiutato' ? 'danger' 
-                                 : 'warning'">
-          {{app.stato}}
+        <ion-badge slot="end"
+          [color]="app.stato === 'confermato' ? 'success'
+                 : app.stato === 'completato' ? 'primary'
+                 : app.stato === 'rifiutato'  ? 'danger'
+                 : 'warning'">
+          {{ app.stato }}
         </ion-badge>
       </ion-item>
     </ion-list>
-  </div>
 
-  <div *ngIf="user?.ruolo === 'cliente'">
-    <h2>I tuoi Referti</h2>
-    <ion-item-divider/>
+    <h3 class="ion-margin-top">I tuoi Referti</h3>
     <ion-item *ngIf="listaAppuntamenti.length === 0">
       <ion-label>Nessun referto disponibile</ion-label>
     </ion-item>
     <ion-card *ngFor="let app of listaAppuntamenti">
       <ion-card-header>
-        <ion-card-title>{{app.prestazione?.descrizione}} - ore {{app.ora}}</ion-card-title>
-        <ion-card-subtitle>{{app.data}}</ion-card-subtitle>
+        <ion-card-title>{{ app.prestazione?.nome }} — ore {{ app.ora }}</ion-card-title>
+        <ion-card-subtitle>{{ app.data }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
         <div *ngIf="app.refertoUrl" class="ion-margin-top">
-          <!-- Button visualizzazione referto -->
           <ion-button fill="solid" color="secondary" (click)="visualizzaReferto(app.refertoUrl)">
             <ion-icon name="eye-outline" slot="start"></ion-icon>
             Visualizza
           </ion-button>
-          
-          <!-- Button scaricamento referto -->
           <ion-button fill="outline" color="primary" (click)="scaricaReferto(app.refertoUrl)">
             <ion-icon name="download-outline" slot="start"></ion-icon>
             Scarica
@@ -60,7 +155,8 @@
         <p *ngIf="!app.refertoUrl">Referto in fase di elaborazione...</p>
       </ion-card-content>
     </ion-card>
-  </div>
+
+  </ng-container>
 </ion-content>
 
 <ion-footer>

@@ -31,7 +31,7 @@ export class LoginPage implements OnInit {
     sesso: 'M',
     email: '',
     password: '',
-    ruolo: 'paziente'
+    ruolo: 'cliente'
   };
 
   showPassword = false;
