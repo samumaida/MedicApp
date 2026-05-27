@@ -16,6 +16,23 @@
           </ion-item>
         </ion-menu-toggle>
 
+        <!-- Prestazioni/Prenota appuntamento -->
+         @if (user?.ruolo === 'operatore') {
+          <ion-menu-toggle auto-hide="false">
+            <ion-item button routerLink="/prestazioni" routerDirection="root">
+              <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+              <ion-label>Prestazioni</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        } @else if (user?.ruolo === 'cliente') {
+          <ion-menu-toggle *ngIf="user?.ruolo === 'cliente'" auto-hide="false">
+            <ion-item button routerLink="/prenota-appuntamento" routerDirection="root">
+              <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+              <ion-label>Prenota appuntamento</ion-label>
+            </ion-item>
+          </ion-menu-toggle>
+        }
+
         <!-- Agenda -->
         <ion-menu-toggle auto-hide="false">
           <ion-item button routerLink="/agenda" routerDirection="root">
@@ -24,25 +41,15 @@
           </ion-item>
         </ion-menu-toggle>
 
-        <!-- Nuovo Appuntamento -->
-        @if (user?.ruolo === 'cliente') {
-          <ion-menu-toggle auto-hide="false">
-            <ion-item button routerLink="/prenota-appuntamento" routerDirection="root">
-              <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-              <ion-label>Prenota Visita</ion-label>
-            </ion-item>
-          </ion-menu-toggle>
-        } @else if (user?.ruolo === 'operatore') {
-          <ion-menu-toggle auto-hide="false">
-            <ion-item button routerLink="/servizi" routerDirection="root">
-              <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-              <ion-label>Servizi</ion-label>
-            </ion-item>
-          </ion-menu-toggle>
-        }
-
         <ion-item-divider></ion-item-divider>
         
+        <!-- Profilo -->
+        <ion-menu-toggle auto-hide="false">
+          <ion-item button routerLink="/profilo" routerDirection="root">
+            <ion-icon slot="start" name="person-outline"></ion-icon>
+            <ion-label>Il mio Profilo</ion-label>
+          </ion-item>
+        </ion-menu-toggle>
         <!-- Pulsante Logout -->
         <ion-menu-toggle auto-hide="false">
           <ion-item button (click)="globalLogout()" detail="false" class="logout-item">

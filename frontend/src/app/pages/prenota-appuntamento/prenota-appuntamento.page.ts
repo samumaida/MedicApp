@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { MockDataService } from '../../services/mock-data';
 import { addIcons } from 'ionicons';
 import { medicalOutline, chevronForwardOutline, arrowBackOutline } from 'ionicons/icons';
 import { Prestazione } from '../../models/reservations.model';
@@ -42,7 +41,6 @@ export class PrenotaAppuntamentoPage implements OnInit {
   ];
 
   constructor(
-    private mockService: MockDataService, 
     private authService: AuthService,
     private router: Router,
     private toastCtrl: ToastController,

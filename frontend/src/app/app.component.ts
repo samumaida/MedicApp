@@ -1,10 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
-import { MockDataService } from './services/mock-data';
+import { AuthService } from './services/auth';
 import { addIcons } from 'ionicons';
-import { appsOutline, calendarOutline, logOutOutline, addCircleOutline } from 'ionicons/icons';
+import { appsOutline, calendarOutline, logOutOutline, addCircleOutline, personOutline } from 'ionicons/icons';
 import { CommonModule } from '@angular/common';
+import { Subscription } from 'rxjs';
+import { User } from './models/user.model';
 
 @Component({
   selector: 'app-root',
@@ -13,22 +15,33 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [IonicModule, RouterModule, CommonModule],
 })
-export class AppComponent {
-  user: any;
+export class AppComponent implements OnInit, OnDestroy {
+  user: User | null = null;
+  private authSubscription!: Subscription;
 
-  constructor(private mockService: MockDataService, private router: Router) {
-    addIcons({ appsOutline, calendarOutline, logOutOutline, addCircleOutline });
+  constructor(private authService: AuthService, private router: Router) {
+    addIcons({ appsOutline, calendarOutline, logOutOutline, addCircleOutline, personOutline });
   }
 
   ngOnInit() {
-    this.mockService.user$.subscribe(utenteLoggato => {
-      this.user = utenteLoggato;
-      console.log('AppComponent ha intercettato il cambio utente:', this.user);
+    this.authSubscription = this.authService.currentUser$.subscribe({
+      next: (utenteLoggato) => {
+        this.user = utenteLoggato;
+      },
+      error: (err) => {
+        console.error('Errore nel tracciare l\'utente in AppComponent:', err);
+      }
     });
   }
 
   globalLogout() {
-    this.mockService.logout();
+    this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  ngOnDestroy() {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
   }
 }

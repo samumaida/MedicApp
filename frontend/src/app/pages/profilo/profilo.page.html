@@ -1,0 +1,62 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Il mio Profilo</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="ion-padding" *ngIf="utente">
+
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Informazioni Personali</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-input label="Nome" labelPlacement="stacked" [(ngModel)]="utente.nome" readonly="true"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input label="Cognome" labelPlacement="stacked" [(ngModel)]="utente.cognome" readonly="true"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input label="Email" labelPlacement="stacked" [(ngModel)]="utente.email" readonly="true"></ion-input>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card *ngIf="utente.ruolo === 'operatore'">
+    <ion-card-header>
+      <ion-card-title>Orari di Ricevimento</ion-card-title>
+      <ion-card-subtitle>Imposta i tuoi orari di lavoro per ciascun giorno</ion-card-subtitle>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-list lines="full">
+        <ion-item *ngFor="let giorno of giorniSettimana">
+          <ion-checkbox [(ngModel)]="giorno.selezionato" slot="start">
+            {{ giorno.nome }}
+          </ion-checkbox>
+
+          <div *ngIf="giorno.selezionato" class="orari-container" slot="end" style="display: flex; gap: 10px; align-items: center;">
+            <ion-input type="time" [(ngModel)]="giorno.inizio" aria-label="Orario inizio"></ion-input>
+            <span>al</span>
+            <ion-input type="time" [(ngModel)]="giorno.fine" aria-label="Orario fine"></ion-input>
+          </div>
+        </ion-item>
+      </ion-list>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <ion-card-content>
+      <div *ngIf="utente.ruolo === 'operatore'" class="ion-padding-bottom">
+        <ion-button expand="block" color="success" (click)="salvaImpostazioniMedico()">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          Salva Impostazioni
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>

@@ -7,7 +7,6 @@ import { FullCalendarComponent } from '@fullcalendar/angular';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { MockDataService } from '../../services/mock-data';
 import { User } from '../../models/user.model';
 import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
 import { AuthService } from '../../services/auth';

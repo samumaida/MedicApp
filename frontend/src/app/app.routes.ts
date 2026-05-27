@@ -25,9 +25,15 @@ export const routes: Routes = [
     path: 'prenota-appuntamento',
     loadComponent: () => import('./pages/prenota-appuntamento/prenota-appuntamento.page').then( m => m.PrenotaAppuntamentoPage),
     canActivate: [authGuard]
-  },  {
+  },
+  {
     path: 'prestazioni',
     loadComponent: () => import('./pages/prestazioni/prestazioni.page').then( m => m.PrestazioniPage)
+  },
+  {
+    path: 'profilo',
+    loadComponent: () => import('./pages/profilo/profilo.page').then( m => m.ProfiloPage),
+    canActivate: [authGuard]
   },
 
 ];

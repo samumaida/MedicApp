@@ -18,4 +18,17 @@ export class PrestazioniApiService {
   salvaPrestazioniOperatore(operatoreId: string, payload: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/aggiorna-operatore/${operatoreId}`, payload);
   }
+
+  salvaImpostazioniProfilo(id: string, specializzazione: string, orariLavoro: any[]): Observable<any> {
+    const body = {
+      specializzazione,
+      orariLavoro
+    };
+    
+    return this.http.patch<any>(`${this.apiUrl}/operatore/${id}/impostazioni-profilo`, body);
+  }
+
+  getProfiloMedico(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/operatore/${id}/profilo`);
+  }
 }

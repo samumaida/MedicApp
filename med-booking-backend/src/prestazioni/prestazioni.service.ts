@@ -1,8 +1,9 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Prestazione } from './entities/prestazione.entity';
 import { In } from 'typeorm';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class PrestazioniService implements OnModuleInit {
@@ -57,4 +58,46 @@ export class PrestazioniService implements OnModuleInit {
             }
         });
     }
+
+  async salvaProfiloMedico(id: string, specializzazione: string, orariLavoro: any[]) {
+    try {
+      await this.prestazioneRepository.manager.update(
+        'User', 
+        { id: id },
+        { 
+          specializzazione: specializzazione,
+          giorniDisponibili: orariLavoro 
+        }
+      );
+      return { success: true, message: 'Profilo e orari aggiornati con successo!' };
+    } catch (error) {
+      console.error('Errore durante il salvataggio delle impostazioni:', error);
+      throw new BadRequestException('Impossibile salvare le impostazioni del profilo.');
+    }
+  }
+
+  async trovaProfiloMedico(id: string) {
+    try {
+      const utente = await this.prestazioneRepository.manager.findOne(User, {
+        where: { id: id } as any
+      });
+
+      if (!utente) {
+        throw new BadRequestException('Operatore non trovato.');
+      }
+
+      return {
+        id: utente.id,
+        nome: utente.nome,
+        cognome: utente.cognome,
+        email: utente.email,
+        ruolo: utente.ruolo,
+        specializzazione: utente.specializzazione,
+        giorniDisponibili: utente.giorniDisponibili || []
+      };
+    } catch (error) {
+      console.error('Errore nel recupero del profilo:', error);
+      throw new BadRequestException('Impossibile recuperare i dati del profilo.');
+    }
+  }
 }

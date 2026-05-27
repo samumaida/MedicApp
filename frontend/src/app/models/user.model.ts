@@ -9,6 +9,8 @@ export interface User {
   indirizzo: string;
   email: string;
   ruolo: 'operatore' | 'cliente' | 'admin';
+  specializzazione?: string;
+  giorniDisponibili?: any[];
 }
 
 export interface Appuntamento {

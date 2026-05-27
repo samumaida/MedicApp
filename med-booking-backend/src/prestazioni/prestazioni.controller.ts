@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
 import { PrestazioniService } from './prestazioni.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
@@ -92,5 +92,18 @@ export class PrestazioniController {
       message: 'Prestazioni aggiornate con successo!', 
       user: operatore
     };
+  }
+
+  @Patch('operatore/:id/impostazioni-profilo')
+  async aggiornaImpostazioniProfilo(
+    @Param('id') id: string,
+    @Body() body: { specializzazione: string; orariLavoro: any[] }
+  ) {
+    return await this.prestazioniService.salvaProfiloMedico(id, body.specializzazione, body.orariLavoro);
+  }
+
+  @Get('operatore/:id/profilo')
+  async getProfiloMedico(@Param('id') id: string) {
+    return await this.prestazioniService.trovaProfiloMedico(id);
   }
 }

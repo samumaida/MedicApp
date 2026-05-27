@@ -3,7 +3,6 @@ import { IonicModule } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { logOutOutline, calendar, documentTextOutline, addCircleOutline, downloadOutline, eyeOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
-import { MockDataService } from '../../services/mock-data';
 import { User } from '../../models/user.model';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
@@ -24,7 +23,6 @@ export class HomePage implements OnInit, OnDestroy {
   private authSubscription!: Subscription;
 
   constructor(
-    private mockService: MockDataService, 
     private router: Router, 
     private authService: AuthService,
     private appuntamentiApiService: AppuntamentiApiService
@@ -74,7 +72,6 @@ export class HomePage implements OnInit, OnDestroy {
 
   logout() {
     this.authService.logout();
-    this.mockService.logout();
     this.router.navigate(['/login']);
   }
 
