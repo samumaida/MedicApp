@@ -19,13 +19,14 @@ export class AppuntamentiApiService {
 
   constructor(private http: HttpClient) {}
 
-  getOperatoriDisponibili(categoriaId: string, giorno: number, prestazioneId: string): Observable<any[]> {
+  getOperatoriDisponibili(categoriaId: string, giorno: number, prestazioneId: string, data: string): Observable<any[]> {
     const params = {
       categoriaId,
       giorno: giorno.toString(),
-      prestazioneId
+      prestazioneId,
+      data
     };
-    
+
     return this.http.get<any[]>(`${this.apiUrl}/operatori-disponibili`, { params });
   }
 

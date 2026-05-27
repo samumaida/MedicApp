@@ -126,11 +126,12 @@ export class PrenotaAppuntamentoPage implements OnInit {
       return;
     }
 
-    // Applico il filtro corretto
+    // Applico il filtro corretto, passando anche la data per escludere gli slot già occupati
     this.appuntamentiApiService.getOperatoriDisponibili(
       this.categoriaSelezionataId,
       giornoSettimana,
-      String(this.prestazioneScelta.id)
+      String(this.prestazioneScelta.id),
+      this.dataSelezionata
     ).subscribe({
       next: (operatori: any[]) => {
         // Postgres restituisce già solo i medici compatibili, attivi e con prezzi/durate corretti

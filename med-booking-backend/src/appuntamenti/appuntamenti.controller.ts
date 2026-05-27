@@ -14,12 +14,14 @@ export class AppuntamentiController {
   async getOperatoriDisponibili(
     @Query('categoriaId') categoriaId: string,
     @Query('giorno') giorno: string,
-    @Query('prestazioneId') prestazioneId: string
+    @Query('prestazioneId') prestazioneId: string,
+    @Query('data') data: string
   ) {
     return await this.appuntamentiService.trovaOperatoriDisponibili(
       categoriaId,
       parseInt(giorno),
-      prestazioneId
+      prestazioneId,
+      data
     );
   }
 

@@ -1,6 +1,6 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { Appuntamento } from './entities/appuntamento.entity';
 import { OperatorePrestazione } from '../prestazioni/entities/operatore-prestazione.entity';
 import { UserRole } from '../users/entities/user.entity';
@@ -15,12 +15,31 @@ export class AppuntamentiService {
   ) {}
 
   async creaAppuntamento(dati: any) {
+    /** 
+     * Controllo che l'operatore non abbia già un appuntamento
+     * attivo nello stesso giorno e alla stessa ora
+     */ 
+    const sovrapposizione = await this.appuntamentoRepository.findOne({
+      where: {
+        operatore: { id: dati.operatoreId },
+        data: dati.data,
+        ora: dati.ora,
+        stato: Not('rifiutato'),
+      },
+    });
+
+    if (sovrapposizione) {
+      throw new ConflictException(
+        'Questo orario è già stato prenotato da un altro paziente. Scegli un orario diverso.'
+      );
+    }
+
     try {
       const nuovoAppuntamento = this.appuntamentoRepository.create({
         data: dati.data,
         ora: dati.ora,
         note: dati.note,
-        stato: 'in attesa', // Stato iniziale di default
+        stato: 'in attesa',
         cliente: { id: dati.clienteId },
         operatore: { id: dati.operatoreId },
         prestazione: { id: dati.prestazioneId },
@@ -35,11 +54,30 @@ export class AppuntamentiService {
   }
 
   /**
-   * Cerca gli operatori reali disponibili in base alla prestazione e al giorno della settimana
+   * Genera tutti gli slot orari possibili in un turno con una durata fissa in minuti.
    */
-  async trovaOperatoriDisponibili(categoriaId: string, giornoSettimana: number, prestazioneId: string) {
+  private generaSlot(inizio: string, fine: string, durataMinuti: number): string[] {
+    const slots: string[] = [];
+    let [h, m] = inizio.split(':').map(Number);
+    const [hFine, mFine] = fine.split(':').map(Number);
+    const minutiFine = hFine * 60 + mFine;
+
+    while (h * 60 + m + durataMinuti <= minutiFine) {
+      slots.push(`${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+      m += durataMinuti;
+      h += Math.floor(m / 60);
+      m = m % 60;
+    }
+
+    return slots;
+  }
+
+  /**
+   * Cerco gli operatori disponibili in base alla prestazione, al giorno della settimana
+   * e alla data specifica restituendo per ciascun operatore gli slot orari ancora liberi.
+   */
+  async trovaOperatoriDisponibili(categoriaId: string, giornoSettimana: number, prestazioneId: string, data: string) {
     try {
-      // Interrogo la tabella pivot filtrando per la prestazione scelta
       const associazioni = await this.operatorePrestazioneRepository.find({
         where: {
           prestazione: { id: prestazioneId }
@@ -49,28 +87,51 @@ export class AppuntamentiService {
         }
       });
 
-      // Filtro i medici che lavorano effettivamente quel giorno ed hanno il ruolo corretto
-      const filtrati = associazioni.filter(assoc => {
+      const risultati: any[] = [];
+
+      for (const assoc of associazioni) {
         const medico = assoc.operatore;
-        
-        if (!medico) return false;
 
-        const eUnOperatore = medico.ruolo === UserRole.OPERATORE;
-        
-        // Verifico se il giorno della settimana (1-7) è incluso nei suoi giorni di lavoro
-        const lavoraOggi = medico.giorniDisponibili?.includes(giornoSettimana);
+        if (!medico || medico.ruolo !== UserRole.OPERATORE) continue;
 
-        return eUnOperatore && lavoraOggi;
-      });
+        // Cerco il turno del medico per il giorno della settimana richiesto
+        const turnoOggi = medico.giorniDisponibili?.find(
+          (t: { giorno: number; inizio: string; fine: string }) => t.giorno === giornoSettimana
+        );
 
-      return filtrati.map(assoc => ({
-        id: assoc.operatore.id,
-        nome: `Dott. ${assoc.operatore.nome} ${assoc.operatore.cognome}`,
-        specializzazione: assoc.operatore.specializzazione,
-        // Presi direttamente dalla pivot del singolo medico
-        prezzo: assoc.prezzo,
-        durataMinuti: assoc.durataMinuti
-      }));
+        if (!turnoOggi) continue; // Se il medico non lavora quel giorno, passo al prossimo
+
+        // Genero tutti gli slot teorici del turno
+        const tuttiGliSlot = this.generaSlot(turnoOggi.inizio, turnoOggi.fine, assoc.durataMinuti);
+
+        // Recupero le prenotazioni esistenti dell'operatore per quella data (escluse le rifiutate)
+        const prenotazioniEsistenti = await this.appuntamentoRepository.find({
+          where: {
+            operatore: { id: medico.id },
+            data: data,
+            stato: Not('rifiutato'),
+          },
+        });
+
+        const oreOccupate = prenotazioniEsistenti.map(p => p.ora);
+
+        // Tengo solo gli slot ancora liberi
+        const orariLiberi = tuttiGliSlot.filter(slot => !oreOccupate.includes(slot));
+
+        // Aggiungo il medico alla lista solo se ha almeno uno slot disponibile
+        if (orariLiberi.length > 0) {
+          risultati.push({
+            id: medico.id,
+            nome: `Dott. ${medico.nome} ${medico.cognome}`,
+            specializzazione: medico.specializzazione,
+            prezzo: assoc.prezzo,
+            durataMinuti: assoc.durataMinuti,
+            orari: orariLiberi,
+          });
+        }
+      }
+
+      return risultati;
 
     } catch (error) {
       console.error('Errore nel recupero degli operatori disponibili:', error);

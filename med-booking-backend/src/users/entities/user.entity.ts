@@ -33,7 +33,7 @@ export class User {
   ruolo!: UserRole;
   
   @Column({ type: 'jsonb', nullable: true })
-  giorniDisponibili?: number[];
+  giorniDisponibili?: { giorno: number; inizio: string; fine: string }[];
 
   @Column({ type: 'varchar', length: 150, nullable: true })
   specializzazione?: string;
