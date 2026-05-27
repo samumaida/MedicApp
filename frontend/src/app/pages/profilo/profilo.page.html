@@ -34,14 +34,14 @@
     <ion-card-content>
       <ion-list lines="full">
         <ion-item *ngFor="let giorno of giorniSettimana">
-          <ion-checkbox [(ngModel)]="giorno.selezionato" slot="start">
+          <ion-checkbox [(ngModel)]="giorno.selezionato" (ngModelChange)="onModifica()" slot="start">
             {{ giorno.nome }}
           </ion-checkbox>
 
           <div *ngIf="giorno.selezionato" class="orari-container" slot="end" style="display: flex; gap: 10px; align-items: center;">
-            <ion-input type="time" [(ngModel)]="giorno.inizio" aria-label="Orario inizio"></ion-input>
+            <ion-input type="time" [(ngModel)]="giorno.inizio" (ngModelChange)="onModifica()" aria-label="Orario inizio"></ion-input>
             <span>al</span>
-            <ion-input type="time" [(ngModel)]="giorno.fine" aria-label="Orario fine"></ion-input>
+            <ion-input type="time" [(ngModel)]="giorno.fine" (ngModelChange)="onModifica()" aria-label="Orario fine"></ion-input>
           </div>
         </ion-item>
       </ion-list>

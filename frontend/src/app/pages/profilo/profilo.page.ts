@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { PrestazioniApiService } from '../../services/prestazioni-api.service';
-import { AuthService } from '../../services/auth'; // <--- Usiamo il servizio REALE
+import { AuthService } from '../../services/auth';
+import { PaginaConModifiche } from '../../guards/unsaved-changes.guard';
 import { Subscription } from 'rxjs';
 import { User } from '../../models/user.model';
 
@@ -14,9 +15,10 @@ import { User } from '../../models/user.model';
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule]
 })
-export class ProfiloPage implements OnInit, OnDestroy {
+export class ProfiloPage implements OnInit, OnDestroy, PaginaConModifiche {
 
   utente: User | null = null;
+  modificheNonSalvate = false;
   private authSubscription!: Subscription;
 
   giorniSettimana = [
@@ -89,6 +91,14 @@ export class ProfiloPage implements OnInit, OnDestroy {
     }
   }
 
+  haModificheNonSalvate(): boolean {
+    return this.modificheNonSalvate;
+  }
+
+  onModifica() {
+    this.modificheNonSalvate = true;
+  }
+
   /**
    * Salvo le modifiche degli orari su Postgres
    */
@@ -109,7 +119,7 @@ export class ProfiloPage implements OnInit, OnDestroy {
       turniFinali
     ).subscribe({
       next: async (risposta) => {
-        console.log('Salvataggio riuscito su Postgres:', risposta);
+        this.modificheNonSalvate = false;
         const toast = await this.toastController.create({
           message: 'Profilo e orari salvati con successo!',
           duration: 2000,
