@@ -31,14 +31,7 @@ export class PrenotaAppuntamentoPage implements OnInit {
   categoriaSelezionataId: string = '';
   testoCercato: string = '';
   categorieFiltrate: any[] = [];
-
-  categoriePrestazioni: any[] = [
-    { id: 'pediatria', nome: 'Pediatria e Ginecologia', immagine: 'assets/images/categories/pediatria.png', prestazioni: [] },
-    { id: 'cardiologia', nome: 'Cardiologia', immagine: 'assets/images/categories/cardiologia.png', prestazioni: [] },
-    { id: 'diagnostica', nome: 'Diagnostica per Immagini', immagine: 'assets/images/categories/radiologia.png', prestazioni: [] },
-    { id: 'laboratorio', nome: 'Analisi di Laboratorio', immagine: 'assets/images/categories/laboratorio.png', prestazioni: [] },
-    { id: 'ortopedia', nome: 'Ortopedia e Fisiatria', immagine: 'assets/images/categories/ortopedia.png', prestazioni: [] }
-  ];
+  categoriePrestazioni: any[] = [];
 
   constructor(
     private authService: AuthService,
@@ -51,8 +44,21 @@ export class PrenotaAppuntamentoPage implements OnInit {
   }
 
   ngOnInit() {
-    this.caricaPrestazioniDalDb();
-    this.categorieFiltrate = [...this.categoriePrestazioni];
+    this.caricaCategorieEPrestazioni();
+  }
+
+  caricaCategorieEPrestazioni() {
+    // Prima carico le categorie dal DB, poi le prestazioni da distribuire in esse
+    this.prestazioniApiService.getCategorie().subscribe({
+      next: (categorie) => {
+        // Inizializzo ogni categoria con un array vuoto di prestazioni
+        this.categoriePrestazioni = categorie.map(cat => ({ ...cat, prestazioni: [] }));
+        this.caricaPrestazioniDalDb();
+      },
+      error: (err) => {
+        console.error('Errore durante il recupero delle categorie:', err);
+      }
+    });
   }
 
   caricaPrestazioniDalDb() {
@@ -60,10 +66,7 @@ export class PrenotaAppuntamentoPage implements OnInit {
       next: (esamiDaDb: Prestazione[]) => {
         this.listaPrestazioni = esamiDaDb;
 
-        // Pulisco i vecchi dati finti dalle categorie grafiche
-        this.categoriePrestazioni.forEach(cat => cat.prestazioni = []);
-
-        // Carico gli esami nelle categorie
+        // Distribuisco le prestazioni nelle rispettive categorie
         esamiDaDb.forEach(esame => {
           const categoria = this.categoriePrestazioni.find(cat => cat.id === esame.categoriaId);
           if (categoria) {
@@ -71,11 +74,11 @@ export class PrenotaAppuntamentoPage implements OnInit {
           }
         });
 
-        // Aggiorno la vista
-        this.categorieFiltrate = [...this.categoriePrestazioni];
+        // Aggiorno la vista mostrando solo le categorie che hanno almeno una prestazione
+        this.categorieFiltrate = this.categoriePrestazioni.filter(cat => cat.prestazioni.length > 0);
       },
       error: (err) => {
-        console.error('Errore durante il recupero dei dati dal backend:', err);
+        console.error('Errore durante il recupero delle prestazioni:', err);
       }
     });
   }

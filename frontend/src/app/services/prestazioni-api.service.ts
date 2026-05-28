@@ -15,6 +15,10 @@ export class PrestazioniApiService {
     return this.http.get<Prestazione[]>(this.apiUrl);
   }
 
+  getCategorie(): Observable<{ id: string; nome: string; immagine: string }[]> {
+    return this.http.get<{ id: string; nome: string; immagine: string }[]>(`${this.apiUrl}/categorie`);
+  }
+
   salvaPrestazioniOperatore(operatoreId: string, payload: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/aggiorna-operatore/${operatoreId}`, payload);
   }

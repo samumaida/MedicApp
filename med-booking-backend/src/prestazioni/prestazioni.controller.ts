@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { OperatorePrestazione } from './entities/operatore-prestazione.entity';
+import { Categoria } from './entities/categoria.entity';
 
 // Interfaccia DTO temporanea per "tipizzare" il body in arrivo dal frontend
 interface AggiornaPrestazioniDto {
@@ -22,6 +23,8 @@ export class PrestazioniController {
     private readonly userRepository: Repository<User>,
     @InjectRepository(OperatorePrestazione)
     private readonly operatorePrestazioneRepository: Repository<OperatorePrestazione>,
+    @InjectRepository(Categoria)
+    private readonly categoriaRepository: Repository<Categoria>,
     private dataSource: DataSource,
   ) {}
 
@@ -29,6 +32,12 @@ export class PrestazioniController {
   @Get()
   getAll() {
     return this.prestazioniService.findAll();
+  }
+
+  // Endpoint per ottenere le categorie disponibili
+  @Get('categorie')
+  getCategorie() {
+    return this.categoriaRepository.find({ order: { nome: 'ASC' } });
   }
 
   // Endpoint per aggiornare le prestazioni scelte da un operatore specifico
