@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PrestazioniService } from './prestazioni.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
@@ -15,6 +16,8 @@ interface AggiornaPrestazioniDto {
   }[];
 }
 
+@ApiTags('Prestazioni')
+@ApiBearerAuth()
 @Controller('prestazioni')
 export class PrestazioniController {
   constructor(
@@ -28,19 +31,19 @@ export class PrestazioniController {
     private dataSource: DataSource,
   ) {}
 
-  // Endpoint per ottenere l'intero catalogo di prestazioni
+  @ApiOperation({ summary: 'Restituisce il catalogo completo delle prestazioni' })
   @Get()
   getAll() {
     return this.prestazioniService.findAll();
   }
 
-  // Endpoint per ottenere le categorie disponibili
+  @ApiOperation({ summary: 'Restituisce le categorie di prestazioni disponibili' })
   @Get('categorie')
   getCategorie() {
     return this.categoriaRepository.find({ order: { nome: 'ASC' } });
   }
 
-  // Endpoint per aggiornare le prestazioni scelte da un operatore specifico
+  @ApiOperation({ summary: 'Salva le prestazioni abilitate da un operatore con prezzo e durata personalizzati' })
   @Post('aggiorna-operatore/:operatoreId')
   async aggiornaPrestazioniOperatore(
     @Param('operatoreId') operatoreId: string,
@@ -103,6 +106,7 @@ export class PrestazioniController {
     };
   }
 
+  @ApiOperation({ summary: 'Aggiorna specializzazione e orari di ricevimento di un operatore' })
   @Patch('operatore/:id/impostazioni-profilo')
   async aggiornaImpostazioniProfilo(
     @Param('id') id: string,
@@ -111,6 +115,7 @@ export class PrestazioniController {
     return await this.prestazioniService.salvaProfiloMedico(id, body.specializzazione, body.orariLavoro);
   }
 
+  @ApiOperation({ summary: 'Restituisce specializzazione e orari di ricevimento di un operatore' })
   @Get('operatore/:id/profilo')
   async getProfiloMedico(@Param('id') id: string) {
     return await this.prestazioniService.trovaProfiloMedico(id);

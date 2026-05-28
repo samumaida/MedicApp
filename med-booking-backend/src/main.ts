@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,17 @@ async function bootstrap() {
     forbidNonWhitelisted: true, // Blocca la richiesta se ci sono proprietà non permesse
     transform: true, // Trasforma i tipi primitivi nei tipi definiti nel DTO
   }));
+  // Configurazione Swagger per la documentazione API
+  const configSwagger = new DocumentBuilder()
+    .setTitle('MedicApp API')
+    .setDescription('Documentazione delle API REST di MedicApp — sistema di prenotazione visite mediche')
+    .setVersion('1.0')
+    .addBearerAuth()  // Aggiunge il campo per il token JWT nell'interfaccia Swagger
+    .build();
+
+  const document = SwaggerModule.createDocument(app, configSwagger);
+  SwaggerModule.setup('api', app, document);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
