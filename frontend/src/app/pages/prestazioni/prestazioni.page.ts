@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth';
-import { PrestazioniService } from '../../services/prestazioni';
+import { PrestazioniApiService } from '../../services/prestazioni-api.service';
 import { PaginaConModifiche } from '../../guards/unsaved-changes.guard';
 import { addIcons } from 'ionicons';
 import { pencilOutline } from 'ionicons/icons';
@@ -32,7 +32,7 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
 
   constructor(
     private authService: AuthService,
-    private prestazioniService: PrestazioniService,
+    private prestazioniApiService: PrestazioniApiService,
     private toastController: ToastController
   ) { 
     addIcons({ pencilOutline });
@@ -49,7 +49,7 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
 
   caricaDati() {
     // Scarico tutte le prestazioni dal backend
-    this.prestazioniService.getCatalogoPrestazioni().subscribe({
+    this.prestazioniApiService.getPrestazioniDalDb().subscribe({
       next: (res) => {
         this.catalogoPrestazioni = res;
         this.mappaPrestazioniAttive();
@@ -156,7 +156,7 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
       }));
 
     // Passo l'array di oggetti al servizio
-    this.prestazioniService.salvaPrestazioniOperatore(this.operatoreLoggato.id, datiDaSalvare).subscribe({
+    this.prestazioniApiService.salvaPrestazioniOperatore(this.operatoreLoggato.id, { prestazioni: datiDaSalvare }).subscribe({
       next: (res) => {
         if (res.success) {
           this.modificheNonSalvate = false;
