@@ -95,9 +95,12 @@
     <ion-card style="max-width: 500px; margin: 20px auto;">
       <ion-card-content class="ion-no-padding">
         <!-- Calendario per scegliere il giorno -->
-        <ion-datetime 
-          presentation="date" 
-          [min]="dataMinima" 
+        <ion-datetime
+          presentation="date"
+          [min]="dataMinima"
+          showDefaultButtons="true"
+          doneText="Conferma"
+          cancelText="Annulla"
           (ionChange)="selezionaData($event)">
         </ion-datetime>
       </ion-card-content>

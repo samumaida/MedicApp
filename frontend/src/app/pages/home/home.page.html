@@ -42,7 +42,7 @@
                 <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
                 <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
               </ion-label>
-              <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+              <ion-badge slot="end" color="warning">in attesa</ion-badge>
             </ion-item>
           </ion-list>
           <ng-template #nessunoDaConfermare>
@@ -68,7 +68,7 @@
                 <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
                 <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
               </ion-label>
-              <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+              <ion-badge slot="end" color="success">confermato</ion-badge>
             </ion-item>
           </ion-list>
           <ng-template #nessunoConfermato>
@@ -94,12 +94,38 @@
                 <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
                 <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
               </ion-label>
-              <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
+              <ion-badge slot="end" color="primary">completato</ion-badge>
             </ion-item>
           </ion-list>
           <ng-template #nessunoCompletato>
             <ion-item lines="none">
               <ion-label color="medium">Nessuna visita completata.</ion-label>
+            </ion-item>
+          </ng-template>
+        </div>
+      </ion-accordion>
+
+      <!-- Rifiutati -->
+      <ion-accordion value="rifiutati">
+        <ion-item slot="header" color="light">
+          <ion-label><strong>Rifiutati</strong></ion-label>
+          <span slot="end" style="font-size: 0.9rem; color: var(--ion-color-medium); margin-right: 8px;">
+            {{ rifiutati.length }}
+          </span>
+        </ion-item>
+        <div slot="content">
+          <ion-list lines="inset" *ngIf="rifiutati.length > 0; else nessunoRifiutato">
+            <ion-item button *ngFor="let app of rifiutati" (click)="apriDettaglio(app)">
+              <ion-label>
+                <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
+                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
+              </ion-label>
+              <ion-badge slot="end" color="danger">rifiutato</ion-badge>
+            </ion-item>
+          </ion-list>
+          <ng-template #nessunoRifiutato>
+            <ion-item lines="none">
+              <ion-label color="medium">Nessun appuntamento rifiutato.</ion-label>
             </ion-item>
           </ng-template>
         </div>
@@ -117,17 +143,17 @@
       <ion-item *ngIf="listaAppuntamenti.length === 0">
         <ion-label>Nessun appuntamento trovato</ion-label>
       </ion-item>
-      <ion-item *ngFor="let app of listaAppuntamenti">
+      <ion-item button *ngFor="let app of listaAppuntamenti" (click)="apriDettaglio(app)">
         <ion-label>
           <h3>{{ app.prestazione?.nome }}</h3>
-          <p>Dott. {{ app.operatore?.nome }} {{ app.operatore?.cognome }} — {{ app.data }} ore {{ app.ora }}</p>
+          <p>Dott. {{ app.operatore?.nome }} {{ app.operatore?.cognome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
         </ion-label>
         <ion-badge slot="end"
-          [color]="app.stato === 'confermato' ? 'success'
-                 : app.stato === 'completato' ? 'primary'
-                 : app.stato === 'rifiutato'  ? 'danger'
+          [color]="getStatoEffettivo(app) === 'confermato' ? 'success'
+                 : getStatoEffettivo(app) === 'completato' ? 'primary'
+                 : getStatoEffettivo(app) === 'rifiutato'  ? 'danger'
                  : 'warning'">
-          {{ app.stato }}
+          {{ getStatoEffettivo(app) }}
         </ion-badge>
       </ion-item>
     </ion-list>

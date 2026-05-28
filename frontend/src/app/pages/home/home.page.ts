@@ -30,16 +30,34 @@ export class HomePage implements OnInit, OnDestroy {
     });
   }
 
+  // Restituisce true se la data dell'appuntamento è precedente a quella odierna
+  isPassato(data: string): boolean {
+    const oggi = new Date().toISOString().split('T')[0];
+    return String(data).split('T')[0] < oggi;
+  }
+
+  // Se la data è passata considero l'appuntamento completato
+  getStatoEffettivo(app: any): string {
+    if (this.isPassato(app.data) && app.stato !== 'rifiutato') {
+      return 'completato';
+    }
+    return app.stato;
+  }
+
   get daConfermare(): any[] {
-    return this.appuntamentiOrdinati.filter(a => a.stato === 'in attesa');
+    return this.appuntamentiOrdinati.filter(a => this.getStatoEffettivo(a) === 'in attesa');
   }
 
   get confermati(): any[] {
-    return this.appuntamentiOrdinati.filter(a => a.stato === 'confermato');
+    return this.appuntamentiOrdinati.filter(a => this.getStatoEffettivo(a) === 'confermato');
   }
 
   get completati(): any[] {
-    return this.appuntamentiOrdinati.filter(a => a.stato === 'completato');
+    return this.appuntamentiOrdinati.filter(a => this.getStatoEffettivo(a) === 'completato');
+  }
+
+  get rifiutati(): any[] {
+    return this.appuntamentiOrdinati.filter(a => a.stato === 'rifiutato');
   }
 
   private authSubscription!: Subscription;
@@ -107,10 +125,16 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async apriDettaglio(appuntamento: any) {
+    // Passo alla modal l'appuntamento con lo stato effettivo
+    const appuntamentoConStatoEffettivo = {
+      ...appuntamento,
+      stato: this.getStatoEffettivo(appuntamento)
+    };
+
     const modal = await this.modalCtrl.create({
       component: AppuntamentoDetailComponent,
       componentProps: {
-        appuntamento,
+        appuntamento: appuntamentoConStatoEffettivo,
         ruoloUtente: this.user?.ruolo
       },
       breakpoints: [0, 0.75, 1],

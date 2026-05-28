@@ -90,6 +90,12 @@ export class AgendaPage implements OnInit {
     });
   }
 
+  ionViewWillEnter() {
+    if (this.currentUser && this.currentUser.id) {
+      this.caricaAppuntamentiSuCalendario();
+    }
+  }
+
   caricaAppuntamentiSuCalendario() {
     if (!this.currentUser || !this.currentUser.id) return;
 
@@ -104,27 +110,40 @@ export class AgendaPage implements OnInit {
         console.log('Dati grezzi ricevuti dal DB per l\'agenda:', appuntamentiRaw);
         
         // Trasformo i dati nel formato accettato da FullCalendar
+        const oggi = new Date().toISOString().split('T')[0];
+
         const eventiFormattati = appuntamentiRaw.map(app => {
           const dataInizio = `${app.data}T${app.ora}:00`;
-          
+
           const oreMinuti = app.ora.split(':');
           const oraFineCorretta = (parseInt(oreMinuti[0]) + 1).toString().padStart(2, '0');
           const dataFine = `${app.data}T${oraFineCorretta}:${oreMinuti[1]}:00`;
 
-          // Se sono il medico voglio vedere il Paziente, se sono il Paziente voglio vedere il Medico
+          // Se sono l'operatore voglio vedere il cliente, se sono il cliente voglio vedere l'operatore
           const titoloMostrato = this.currentUser?.ruolo === 'operatore'
             ? `${app.prestazione?.nome} - Paziente: ${app.cliente?.nome} ${app.cliente?.cognome}`
             : `${app.prestazione?.nome} - Dott. ${app.operatore?.nome} ${app.operatore?.cognome}`;
+
+          // Se la data è passata e l'appuntamento non è rifiutato allora lo tratto come completato
+          const isPassato = String(app.data).split('T')[0] < oggi;
+          const statoEffettivo = isPassato && app.stato !== 'rifiutato' ? 'completato' : app.stato;
+
+          // Coloro l'evento in base allo stato
+          const coloreEvento =
+            statoEffettivo === 'completato' ? '#3880ff' :
+            statoEffettivo === 'confermato' ? '#2dd36f' :
+            statoEffettivo === 'rifiutato'  ? '#eb445a' :
+                                              '#ffc409';
 
           return {
             id: app.id,
             title: titoloMostrato,
             start: dataInizio,
             end: dataFine,
-            color: app.stato === 'confermato' ? '#2dd36f' : '#ffc409',
+            color: coloreEvento,
 
             extendedProps: {
-              stato: app.stato,
+              stato: statoEffettivo,
               ora: app.ora,
               data: app.data,
               clienteNome: app.cliente ? `${app.cliente.nome} ${app.cliente.cognome}` : 'N/D',
