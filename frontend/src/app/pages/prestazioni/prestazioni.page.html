@@ -42,9 +42,13 @@
       </ion-item>
     </ion-list>
 
-    <ion-button expand="block" class="ion-margin-top ion-margin-bottom" (click)="apriModalNuovaPrestazione()">
+    <ion-button expand="block" class="ion-margin-top" (click)="apriModalNuovaPrestazione()">
       <ion-icon name="add-outline" slot="start"></ion-icon>
       Aggiungi Prestazione
+    </ion-button>
+    <ion-button expand="block" fill="outline" class="ion-margin-top ion-margin-bottom" (click)="apriGestioneCategorie()">
+      <ion-icon name="folder-outline" slot="start"></ion-icon>
+      Gestisci Categorie
     </ion-button>
   </ng-container>
 
@@ -120,12 +124,12 @@
         <ion-item>
           <ion-input label="Descrizione" labelPlacement="floating" [(ngModel)]="modalAdmin.descrizione"></ion-input>
         </ion-item>
-        <ion-item>
-          <ion-select label="Categoria" labelPlacement="floating" [(ngModel)]="modalAdmin.categoriaId" placeholder="Seleziona categoria">
-            <ion-select-option *ngFor="let cat of categorieDisponibili" [value]="cat.id">
-              {{ cat.nome }}
-            </ion-select-option>
-          </ion-select>
+        <ion-item button (click)="apriCategoriaPicker()">
+          <ion-label>
+            <p>Categoria</p>
+            <h3>{{ modalAdmin.categoriaNome || modalAdmin.categoriaId || 'Seleziona categoria...' }}</h3>
+          </ion-label>
+          <ion-icon name="chevron-forward-outline" slot="end" color="medium"></ion-icon>
         </ion-item>
         <ion-item>
           <ion-input label="Durata (minuti)" labelPlacement="floating" type="number" [(ngModel)]="modalAdmin.durataMinuti"></ion-input>
@@ -136,6 +140,106 @@
         <ion-button expand="block" class="ion-margin-top" (click)="salvaModalAdmin()">
           {{ isNuovaPrestazione ? 'Aggiungi al Catalogo' : 'Salva Modifiche' }}
         </ion-button>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Admin | Modal picker categoria searchable -->
+  <ion-modal [isOpen]="isCategoriaPickerOpen" (didDismiss)="isCategoriaPickerOpen = false">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Seleziona Categoria</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="isCategoriaPickerOpen = false">Chiudi</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-searchbar
+          placeholder="Cerca categoria..."
+          (ionInput)="filtraCategoriePicker($event)"
+          animated="true">
+        </ion-searchbar>
+        <ion-list lines="inset">
+          <ion-item button *ngFor="let cat of categoriePickerFiltrate" (click)="selezionaCategoriaDaPicker(cat)">
+            <ion-label>{{ cat.nome }}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Admin | Modal gestione categorie -->
+  <ion-modal [isOpen]="isGestioneCategorieOpen" (didDismiss)="chiudiGestioneCategorie()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Gestione Categorie</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="aggiornaCategorieEChiudi()">Chiudi</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+
+        <!-- Form aggiungi / modifica categoria -->
+        <ion-card class="ion-margin-bottom">
+          <ion-card-header>
+            <ion-card-title>{{ isModificaCategoria ? 'Modifica Categoria' : 'Nuova Categoria' }}</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-item>
+              <ion-input label="Nome visualizzato" labelPlacement="floating" [(ngModel)]="nuovaCategoria.nome"></ion-input>
+            </ion-item>
+            <ion-item>
+              <ion-input label="ID (es. dermatologia)" labelPlacement="floating" [(ngModel)]="nuovaCategoria.id"></ion-input>
+            </ion-item>
+
+            <!-- Upload immagine -->
+            <div class="ion-padding-top ion-padding-horizontal">
+              <p style="font-size: 0.85rem; color: var(--ion-color-medium);">Immagine (max 1.5 MB)</p>
+              <input type="file" accept="image/*" (change)="onImmagineSelezionata($event)" style="margin-top: 6px;">
+              <div *ngIf="immaginePreview" class="ion-margin-top" style="text-align: center;">
+                <img [src]="immaginePreview" alt="Anteprima" style="max-height: 120px; border-radius: 8px; object-fit: cover;">
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 8px;" class="ion-margin-top">
+              <ion-button expand="block" style="flex: 1;" (click)="aggiungicategoria()">
+                <ion-icon [name]="isModificaCategoria ? 'save-outline' : 'add-outline'" slot="start"></ion-icon>
+                {{ isModificaCategoria ? 'Salva Modifiche' : 'Aggiungi' }}
+              </ion-button>
+              <ion-button *ngIf="isModificaCategoria" fill="outline" color="medium" (click)="annullaModificaCategoria()">
+                Annulla
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+
+        <h3>Categorie esistenti</h3>
+        <ion-searchbar
+          placeholder="Cerca categoria..."
+          (ionInput)="filtraCategoriePicker($event)"
+          animated="true">
+        </ion-searchbar>
+        <ion-list lines="inset">
+          <ion-item *ngFor="let cat of categoriePickerFiltrate"
+            [style.--background]="cat.id === idCategoriaInModifica ? 'var(--ion-color-primary-tint)' : ''"
+            [style.--color]="cat.id === idCategoriaInModifica ? 'var(--ion-color-primary-contrast)' : ''">
+            <ion-label>
+              <h3>{{ cat.nome }}</h3>
+              <p>{{ cat.id }}</p>
+            </ion-label>
+            <ion-button slot="end" fill="clear" color="primary" (click)="avviaModificaCategoria(cat)">
+              <ion-icon name="pencil-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+            <ion-button slot="end" fill="clear" color="danger" (click)="eliminaCategoria(cat.id)">
+              <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-item>
+        </ion-list>
+
       </ion-content>
     </ng-template>
   </ion-modal>

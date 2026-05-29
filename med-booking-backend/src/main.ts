@@ -6,6 +6,10 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Aumento il limite del payload per supportare le immagini base64 delle categorie
+  app.use(require('express').json({ limit: '2mb' }));
+  app.use(require('express').urlencoded({ limit: '2mb', extended: true }));
+
   app.enableCors({
     origin: 'http://localhost:8100', // L'indirizzo standard dove gira Ionic in locale
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

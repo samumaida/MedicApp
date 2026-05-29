@@ -9,7 +9,7 @@ export class Categoria {
   @Column({ type: 'varchar', length: 150 })
   nome!: string;
 
-  // Percorso relativo all'immagine servita dal frontend
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  // Immagine categoria di tipo percorso relativo oppure stringa base64 per upload diretto dall'admin
+  @Column({ type: 'text', nullable: true })
   immagine!: string;
 }

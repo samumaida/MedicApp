@@ -148,4 +148,38 @@ export class PrestazioniController {
     await this.prestazioniService.elimina(id);
     return { success: true, message: 'Prestazione eliminata con successo.' };
   }
+
+  @ApiOperation({ summary: '[ADMIN] Crea una nuova categoria' })
+  @UseGuards(AdminGuard)
+  @Post('categorie')
+  async creaCategoria(@Body() body: { id: string; nome: string; immagine?: string }) {
+    return await this.categoriaRepository.save(body);
+  }
+
+  @ApiOperation({ summary: '[ADMIN] Modifica nome, id o immagine di una categoria esistente' })
+  @UseGuards(AdminGuard)
+  @Patch('categorie/:id')
+  async aggiornaCategoria(
+    @Param('id') id: string,
+    @Body() body: { id?: string; nome?: string; immagine?: string }
+  ) {
+    // Se cambia l'ID aggiorno anche il categoriaId nelle prestazioni collegate
+    if (body.id && body.id !== id) {
+      await this.prestazioniService.aggiornaCategoriaId(id, body.id);
+    }
+    const { id: nuovoId, ...rest } = body;
+    const categoriaAggiornata = { ...rest, ...(nuovoId ? { id: nuovoId } : {}) };
+    await this.categoriaRepository.update(id, categoriaAggiornata);
+    return await this.categoriaRepository.findOne({ where: { id: nuovoId ?? id } });
+  }
+
+  @ApiOperation({ summary: '[ADMIN] Elimina una categoria e dissocia le prestazioni collegate' })
+  @UseGuards(AdminGuard)
+  @Delete('categorie/:id')
+  async eliminaCategoria(@Param('id') id: string) {
+    // Dissocia le prestazioni collegate impostando categoriaId a null
+    await this.prestazioniService.dissociaCategoria(id);
+    await this.categoriaRepository.delete(id);
+    return { success: true, message: 'Categoria eliminata. Le prestazioni collegate sono state dissociate.' };
+  }
 }

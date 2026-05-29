@@ -1,13 +1,13 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
-import { Subscription } from 'rxjs';
+import { IonicModule, ToastController, AlertController } from '@ionic/angular';
+import { Subscription, take } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { PrestazioniApiService } from '../../services/prestazioni-api.service';
 import { PaginaConModifiche } from '../../guards/unsaved-changes.guard';
 import { addIcons } from 'ionicons';
-import { pencilOutline, trashOutline, addOutline } from 'ionicons/icons';
+import { pencilOutline, trashOutline, addOutline, folderOutline, chevronForwardOutline, saveOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-prestazioni',
@@ -30,18 +30,33 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
 
   private authSub!: Subscription;
 
-  // Adatta la modal alle azioni dell'admin
+  // Modal prestazione admin
   modalAdmin: any = null;
   isModalAdminOpen = false;
   isNuovaPrestazione = false;
-  categorieDisponibili: { id: string; nome: string }[] = [];
+
+  categorieDisponibili: { id: string; nome: string; immagine?: string }[] = [];
+
+  // Picker per selezione categoria in creazione/modifica prestazione
+  isCategoriaPickerOpen = false;
+  categoriePickerFiltrate: { id: string; nome: string }[] = [];
+  testoCercatoCategoria = '';
+
+  // Modal per gestione categorie
+  isGestioneCategorieOpen = false;
+  nuovaCategoria = { id: '', nome: '', immagine: '' };
+  immaginePreview: string = '';
+  isModificaCategoria = false;
+  idCategoriaInModifica = '';
 
   constructor(
     private authService: AuthService,
     private prestazioniApiService: PrestazioniApiService,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private alertController: AlertController,
+    private ngZone: NgZone
   ) {
-    addIcons({ pencilOutline, trashOutline, addOutline });
+    addIcons({ pencilOutline, trashOutline, addOutline, folderOutline, chevronForwardOutline, saveOutline });
    }
 
   ngOnInit() {
@@ -214,9 +229,28 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
   salvaModalAdmin() {
     if (!this.modalAdmin) return;
 
+    if (!this.modalAdmin.nome?.trim()) {
+      this.mostraToast('Il nome della prestazione è obbligatorio.', 'warning');
+      return;
+    }
+
+    if (!this.modalAdmin.categoriaId) {
+      this.mostraToast('Seleziona una categoria prima di salvare.', 'warning');
+      return;
+    }
+
+    // Costruisco un oggetto pulito con solo i campi che il backend accetta
+    const datiDaInviare = {
+      nome: this.modalAdmin.nome,
+      descrizione: this.modalAdmin.descrizione,
+      categoriaId: this.modalAdmin.categoriaId,
+      durataMinuti: this.modalAdmin.durataMinuti,
+      prezzo: this.modalAdmin.prezzo
+    };
+
     const operazione$ = this.isNuovaPrestazione
-      ? this.prestazioniApiService.creaPrestazioneAdmin(this.modalAdmin)
-      : this.prestazioniApiService.aggiornaPrestazioneAdmin(this.modalAdmin.id, this.modalAdmin);
+      ? this.prestazioniApiService.creaPrestazioneAdmin(datiDaInviare)
+      : this.prestazioniApiService.aggiornaPrestazioneAdmin(this.modalAdmin.id, datiDaInviare);
 
     operazione$.subscribe({
       next: () => {
@@ -236,6 +270,180 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
       },
       error: () => this.mostraToast('Errore durante l\'eliminazione.', 'danger')
     });
+  }
+
+  /**
+   * Picker categoria searchable
+   */
+
+  apriCategoriaPicker() {
+    this.categoriePickerFiltrate = [...this.categorieDisponibili];
+    this.testoCercatoCategoria = '';
+    this.isCategoriaPickerOpen = true;
+  }
+
+  filtraCategoriePicker(event: any) {
+    const q = (event.target.value || '').toLowerCase().trim();
+    this.categoriePickerFiltrate = this.categorieDisponibili.filter(c =>
+      c.nome.toLowerCase().includes(q)
+    );
+  }
+
+  selezionaCategoriaDaPicker(cat: { id: string; nome: string }) {
+    if (this.modalAdmin) {
+      this.modalAdmin.categoriaId = cat.id;
+      this.modalAdmin.categoriaNome = cat.nome;
+    }
+    this.isCategoriaPickerOpen = false;
+  }
+
+  /**
+   * Gestione categorie
+   */
+
+  apriGestioneCategorie() {
+    this.nuovaCategoria = { id: '', nome: '', immagine: '' };
+    this.immaginePreview = '';
+    this.isModificaCategoria = false;
+    this.idCategoriaInModifica = '';
+    this.categoriePickerFiltrate = [...this.categorieDisponibili];
+    this.isGestioneCategorieOpen = true;
+  }
+
+  chiudiGestioneCategorie() {
+    this.isGestioneCategorieOpen = false;
+  }
+
+  aggiornaCategorieEChiudi() {
+    this.prestazioniApiService.getCategorie().subscribe({
+      next: (cats) => {
+        this.categorieDisponibili = cats;
+        this.chiudiGestioneCategorie();
+      }
+    });
+  }
+
+  // Verifico la dimensione dell'immagine e la converto in base64
+  onImmagineSelezionata(event: any) {
+    const file: File = event.target.files[0];
+    if (!file) return;
+
+    const maxSizeKB = 1500;
+    if (file.size > maxSizeKB * 1024) {
+      this.mostraToast(`Immagine troppo grande. Massimo consentito: ${maxSizeKB} KB.`, 'warning');
+      event.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      this.nuovaCategoria.immagine = base64;
+      this.immaginePreview = base64;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  avviaModificaCategoria(cat: any) {
+    this.nuovaCategoria = { id: cat.id, nome: cat.nome, immagine: cat.immagine || '' };
+    this.immaginePreview = cat.immagine || '';
+    this.isModificaCategoria = true;
+    this.idCategoriaInModifica = cat.id;
+
+    // Aspetta la fine del ciclo di change detection per assicurarmi che il DOM sia aggiornato
+    this.ngZone.onStable.pipe(take(1)).subscribe(() => {
+      const modalContent = document.querySelector('ion-modal ion-content');
+      if (modalContent) {
+        (modalContent as any).scrollToTop(300);
+      }
+    });
+  }
+
+  annullaModificaCategoria() {
+    this.nuovaCategoria = { id: '', nome: '', immagine: '' };
+    this.immaginePreview = '';
+    this.isModificaCategoria = false;
+    this.idCategoriaInModifica = '';
+  }
+
+  private ricaricaCategorie() {
+    this.prestazioniApiService.getCategorie().subscribe(cats => {
+      this.categorieDisponibili = cats;
+      this.categoriePickerFiltrate = [...cats];
+    });
+  }
+
+  aggiungicategoria() {
+    this.nuovaCategoria.id = this.nuovaCategoria.id.trim().toLowerCase().replace(/\s+/g, '_');
+    this.nuovaCategoria.nome = this.nuovaCategoria.nome.trim();
+
+    if (!this.nuovaCategoria.id || !this.nuovaCategoria.nome) {
+      this.mostraToast('ID e Nome sono obbligatori.', 'warning');
+      return;
+    }
+
+    const operazione$ = this.isModificaCategoria
+      ? this.prestazioniApiService.aggiornaCategoriaAdmin(this.idCategoriaInModifica, this.nuovaCategoria)
+      : this.prestazioniApiService.creaCategoriaAdmin(this.nuovaCategoria);
+
+    operazione$.subscribe({
+      next: () => {
+        this.mostraToast(this.isModificaCategoria ? 'Categoria aggiornata.' : 'Categoria aggiunta.', 'success');
+        this.annullaModificaCategoria();
+        this.ricaricaCategorie();
+        this.caricaDati();
+      },
+      error: () => this.mostraToast('Errore durante il salvataggio.', 'danger')
+    });
+  }
+
+  async eliminaCategoria(id: string) {
+    const categoria = this.categorieDisponibili.find(c => c.id === id);
+    const prestazioniCollegate = this.catalogoPrestazioni.filter(p => p.categoriaId === id);
+    const nPrestazioni = prestazioniCollegate.length;
+
+    // Prima conferma eliminazione categoria
+    const alert1 = await this.alertController.create({
+      header: 'Elimina Categoria',
+      message: `Sei sicuro di voler eliminare "${categoria?.nome}"? ${nPrestazioni > 0 ? `Ci sono ${nPrestazioni} prestazioni collegate che verranno dissociate.` : 'Nessuna prestazione è collegata a questa categoria.'}`,
+      buttons: [
+        { text: 'Annulla', role: 'cancel' },
+        {
+          text: 'Continua',
+          role: 'destructive',
+          handler: async () => {
+            // Seconda conferma eliminazione categoria con istruzioni operative
+            const nomiPrestazioni = prestazioniCollegate.map(p => p.nome).join(', ');
+            const alert2 = await this.alertController.create({
+              header: 'Conferma definitiva',
+              message: nPrestazioni > 0
+                ? `Dopo l\'eliminazione le seguenti prestazioni rimarranno senza categoria e non saranno prenotabili dai clienti: ${nomiPrestazioni}. Dovrai riaprire ciascuna di esse dalla sezione "Gestione Catalogo" e assegnare una nuova categoria. Vuoi procedere?`
+                : 'Stai per eliminare definitivamente questa categoria. L\'operazione non è reversibile. Vuoi procedere?',
+              buttons: [
+                { text: 'Annulla', role: 'cancel' },
+                {
+                  text: 'Elimina definitivamente',
+                  role: 'destructive',
+                  handler: () => {
+                    this.prestazioniApiService.eliminaCategoriaAdmin(id).subscribe({
+                      next: () => {
+                        this.mostraToast('Categoria eliminata.', 'success');
+                        this.ricaricaCategorie();
+                        this.caricaDati();
+                      },
+                      error: () => this.mostraToast('Errore durante l\'eliminazione.', 'danger')
+                    });
+                  }
+                }
+              ]
+            });
+            await alert2.present();
+          }
+        }
+      ]
+    });
+
+    await alert1.present();
   }
 
   ngOnDestroy() {

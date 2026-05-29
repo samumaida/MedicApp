@@ -19,6 +19,18 @@ export class PrestazioniApiService {
     return this.http.get<{ id: string; nome: string; immagine: string }[]>(`${this.apiUrl}/categorie`);
   }
 
+  creaCategoriaAdmin(dati: { id: string; nome: string; immagine?: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/categorie`, dati);
+  }
+
+  aggiornaCategoriaAdmin(id: string, dati: { id?: string; nome?: string; immagine?: string }): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/categorie/${id}`, dati);
+  }
+
+  eliminaCategoriaAdmin(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/categorie/${id}`);
+  }
+
   creaPrestazioneAdmin(dati: { nome: string; descrizione?: string; categoriaId: string; durataMinuti: number; prezzo: number }): Observable<any> {
     return this.http.post<any>(this.apiUrl, dati);
   }

@@ -69,6 +69,26 @@ export class PrestazioniService implements OnModuleInit {
     return await this.prestazioneRepository.findOneOrFail({ where: { id } });
   }
 
+  // Aggiorna il categoriaId nelle prestazioni quando l'ID della categoria cambia
+  async aggiornaCategoriaId(vecchioId: string, nuovoId: string): Promise<void> {
+    await this.prestazioneRepository
+      .createQueryBuilder()
+      .update()
+      .set({ categoriaId: nuovoId })
+      .where('categoriaId = :vecchioId', { vecchioId })
+      .execute();
+  }
+
+  // Dissocia tutte le prestazioni da una categoria prima di eliminarla
+  async dissociaCategoria(categoriaId: string): Promise<void> {
+    await this.prestazioneRepository
+      .createQueryBuilder()
+      .update()
+      .set({ categoriaId: () => 'NULL' })
+      .where('categoriaId = :categoriaId', { categoriaId })
+      .execute();
+  }
+
   // Elimina una prestazione
   // Prima rimuove le relazioni degli operatori per evitare errori di foreign key
   async elimina(id: string): Promise<void> {
