@@ -17,18 +17,18 @@
         </ion-menu-toggle>
 
         <!-- Prestazioni/Prenota appuntamento -->
-         @if (user?.ruolo === 'operatore') {
+         @if (user?.ruolo === 'operatore' || user?.ruolo === 'admin') {
           <ion-menu-toggle auto-hide="false">
             <ion-item button routerLink="/prestazioni" routerDirection="root">
               <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-              <ion-label>Prestazioni</ion-label>
+              <ion-label>Prestazioni erogate</ion-label>
             </ion-item>
           </ion-menu-toggle>
         } @else if (user?.ruolo === 'cliente') {
           <ion-menu-toggle *ngIf="user?.ruolo === 'cliente'" auto-hide="false">
             <ion-item button routerLink="/prenota-appuntamento" routerDirection="root">
               <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-              <ion-label>Prenota appuntamento</ion-label>
+              <ion-label>Nuovo appuntamento</ion-label>
             </ion-item>
           </ion-menu-toggle>
         }

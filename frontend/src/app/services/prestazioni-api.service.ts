@@ -19,6 +19,18 @@ export class PrestazioniApiService {
     return this.http.get<{ id: string; nome: string; immagine: string }[]>(`${this.apiUrl}/categorie`);
   }
 
+  creaPrestazioneAdmin(dati: { nome: string; descrizione?: string; categoriaId: string; durataMinuti: number; prezzo: number }): Observable<any> {
+    return this.http.post<any>(this.apiUrl, dati);
+  }
+
+  aggiornaPrestazioneAdmin(id: string, dati: Partial<{ nome: string; descrizione: string; categoriaId: string; durataMinuti: number; prezzo: number }>): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/${id}`, dati);
+  }
+
+  eliminaPrestazioneAdmin(id: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  }
+
   salvaPrestazioniOperatore(operatoreId: string, payload: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/aggiorna-operatore/${operatoreId}`, payload);
   }

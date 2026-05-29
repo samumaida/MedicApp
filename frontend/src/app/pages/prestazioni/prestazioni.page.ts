@@ -7,7 +7,7 @@ import { AuthService } from '../../services/auth';
 import { PrestazioniApiService } from '../../services/prestazioni-api.service';
 import { PaginaConModifiche } from '../../guards/unsaved-changes.guard';
 import { addIcons } from 'ionicons';
-import { pencilOutline } from 'ionicons/icons';
+import { pencilOutline, trashOutline, addOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-prestazioni',
@@ -30,12 +30,18 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
 
   private authSub!: Subscription;
 
+  // Adatta la modal alle azioni dell'admin
+  modalAdmin: any = null;
+  isModalAdminOpen = false;
+  isNuovaPrestazione = false;
+  categorieDisponibili: { id: string; nome: string }[] = [];
+
   constructor(
     private authService: AuthService,
     private prestazioniApiService: PrestazioniApiService,
     private toastController: ToastController
-  ) { 
-    addIcons({ pencilOutline });
+  ) {
+    addIcons({ pencilOutline, trashOutline, addOutline });
    }
 
   ngOnInit() {
@@ -48,6 +54,12 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
   }
 
   caricaDati() {
+    // Scarico le categorie per popolare la lista "categoria" in creazione/modifica prestazione
+    this.prestazioniApiService.getCategorie().subscribe({
+      next: (cats) => this.categorieDisponibili = cats,
+      error: () => {}
+    });
+
     // Scarico tutte le prestazioni dal backend
     this.prestazioniApiService.getPrestazioniDalDb().subscribe({
       next: (res) => {
@@ -176,6 +188,54 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  /**
+   * Metodi riservati all'admin
+   */
+
+  apriModalNuovaPrestazione() {
+    this.modalAdmin = { nome: '', descrizione: '', categoriaId: '', durataMinuti: 30, prezzo: 0 };
+    this.isNuovaPrestazione = true;
+    this.isModalAdminOpen = true;
+  }
+
+  apriModalModificaAdmin(prestazione: any) {
+    this.modalAdmin = { ...prestazione };
+    this.isNuovaPrestazione = false;
+    this.isModalAdminOpen = true;
+  }
+
+  chiudiModalAdmin() {
+    this.isModalAdminOpen = false;
+    this.modalAdmin = null;
+  }
+
+  salvaModalAdmin() {
+    if (!this.modalAdmin) return;
+
+    const operazione$ = this.isNuovaPrestazione
+      ? this.prestazioniApiService.creaPrestazioneAdmin(this.modalAdmin)
+      : this.prestazioniApiService.aggiornaPrestazioneAdmin(this.modalAdmin.id, this.modalAdmin);
+
+    operazione$.subscribe({
+      next: () => {
+        this.mostraToast(this.isNuovaPrestazione ? 'Prestazione aggiunta.' : 'Prestazione aggiornata.', 'success');
+        this.chiudiModalAdmin();
+        this.caricaDati();
+      },
+      error: () => this.mostraToast('Errore durante il salvataggio.', 'danger')
+    });
+  }
+
+  eliminaPrestazioneAdmin(id: string) {
+    this.prestazioniApiService.eliminaPrestazioneAdmin(id).subscribe({
+      next: () => {
+        this.mostraToast('Prestazione eliminata.', 'success');
+        this.caricaDati();
+      },
+      error: () => this.mostraToast('Errore durante l\'eliminazione.', 'danger')
+    });
   }
 
   ngOnDestroy() {

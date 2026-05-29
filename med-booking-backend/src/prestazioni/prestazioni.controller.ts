@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { PrestazioniService } from './prestazioni.service';
+import { AdminGuard } from '../auth/admin.guard';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
@@ -119,5 +120,32 @@ export class PrestazioniController {
   @Get('operatore/:id/profilo')
   async getProfiloMedico(@Param('id') id: string) {
     return await this.prestazioniService.trovaProfiloMedico(id);
+  }
+
+  // Endpoint riservati all'admin
+
+  @ApiOperation({ summary: '[ADMIN] Aggiunge una nuova prestazione al catalogo globale' })
+  @UseGuards(AdminGuard)
+  @Post()
+  async creaPrestazione(@Body() body: { nome: string; descrizione?: string; categoriaId: string; durataMinuti: number; prezzo: number }) {
+    return await this.prestazioniService.crea(body);
+  }
+
+  @ApiOperation({ summary: '[ADMIN] Modifica una prestazione esistente nel catalogo' })
+  @UseGuards(AdminGuard)
+  @Patch(':id')
+  async aggiornaPrestazione(
+    @Param('id') id: string,
+    @Body() body: { nome?: string; descrizione?: string; categoriaId?: string; durataMinuti?: number; prezzo?: number }
+  ) {
+    return await this.prestazioniService.aggiorna(id, body);
+  }
+
+  @ApiOperation({ summary: '[ADMIN] Elimina una prestazione dal catalogo globale' })
+  @UseGuards(AdminGuard)
+  @Delete(':id')
+  async eliminaPrestazione(@Param('id') id: string) {
+    await this.prestazioniService.elimina(id);
+    return { success: true, message: 'Prestazione eliminata con successo.' };
   }
 }

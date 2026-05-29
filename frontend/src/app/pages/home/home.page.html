@@ -192,12 +192,12 @@
         @if (user?.ruolo === 'cliente') {
           <ion-tab-button (click)="navigaA('/prenota-appuntamento')">
             <ion-icon name="add-circle-outline"></ion-icon>
-            <ion-label>Prenota</ion-label>
+            <ion-label>Nuovo appuntamento</ion-label>
           </ion-tab-button>
-        } @else if (user?.ruolo === 'operatore') {
+        } @else if (user?.ruolo === 'operatore' || user?.ruolo === 'admin') {
           <ion-tab-button (click)="navigaA('/prestazioni')">
             <ion-icon name="add-circle-outline"></ion-icon>
-            <ion-label>Prestazioni</ion-label>
+            <ion-label>Prestazioni erogate</ion-label>
           </ion-tab-button>
         }
         <ion-tab-button (click)="navigaA('/agenda')">

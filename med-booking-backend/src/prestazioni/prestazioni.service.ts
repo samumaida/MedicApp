@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Prestazione } from './entities/prestazione.entity';
+import { OperatorePrestazione } from './entities/operatore-prestazione.entity';
 import { In } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 
@@ -10,6 +11,8 @@ export class PrestazioniService implements OnModuleInit {
   constructor(
     @InjectRepository(Prestazione)
     private readonly prestazioneRepository: Repository<Prestazione>,
+    @InjectRepository(OperatorePrestazione)
+    private readonly operatorePrestazioneRepository: Repository<OperatorePrestazione>,
   ) {}
 
   // Questo metodo scatta da solo all'avvio del server NestJS
@@ -49,6 +52,28 @@ export class PrestazioniService implements OnModuleInit {
   // Ritorna tutto il catalogo disponibile
   async findAll(): Promise<Prestazione[]> {
     return await this.prestazioneRepository.find({ order: { nome: 'ASC' } });
+  }
+
+  /**
+   * Metodi riservati all'admin
+   */
+  // Crea una nuova prestazione
+  async crea(dati: Partial<Prestazione>): Promise<Prestazione> {
+    const nuova = this.prestazioneRepository.create(dati);
+    return await this.prestazioneRepository.save(nuova);
+  }
+
+  // Modifica una prestazione esistente
+  async aggiorna(id: string, dati: Partial<Prestazione>): Promise<Prestazione> {
+    await this.prestazioneRepository.update(id, dati);
+    return await this.prestazioneRepository.findOneOrFail({ where: { id } });
+  }
+
+  // Elimina una prestazione
+  // Prima rimuove le relazioni degli operatori per evitare errori di foreign key
+  async elimina(id: string): Promise<void> {
+    await this.operatorePrestazioneRepository.delete({ prestazione: { id } });
+    await this.prestazioneRepository.delete(id);
   }
 
   async findManyByIds(ids: string[]): Promise<Prestazione[]> {

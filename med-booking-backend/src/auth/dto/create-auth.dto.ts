@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 import { UserRole } from '../../users/entities/user.entity';
 
 export class CreateAuthDto {
@@ -17,9 +17,10 @@ export class CreateAuthDto {
   @MinLength(6, { message: 'La password deve contenere almeno 6 caratteri' })
   password!: string;
 
-  // Uso l'Enum nativo per validare i ruoli, così evito errori di battitura e garantisco che solo i ruoli validi vengano accettati
-  @IsEnum(UserRole, { message: 'Il ruolo selezionato non è valido' })
-  ruolo!: UserRole;   
+  // Solo i ruoli 'cliente' e 'operatore' sono accettati dalla registrazione pubblica.
+  // Il ruolo 'admin' è escluso intenzionalmente in quanto l'admin è creato solo manualmente sul database.
+  @IsIn([UserRole.CLIENTE, UserRole.OPERATORE], { message: 'Il ruolo selezionato non è valido' })
+  ruolo!: UserRole;
 
   // Campi opzionali, li lascio pronti per quando registrerò i dati specifici del cliente
   @IsOptional()
