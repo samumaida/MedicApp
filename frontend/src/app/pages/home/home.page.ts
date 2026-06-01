@@ -4,6 +4,7 @@ import { addIcons } from 'ionicons';
 import { logOutOutline, calendar, documentTextOutline, addCircleOutline, downloadOutline, eyeOutline, alertCircleOutline, checkmarkCircleOutline, closeCircleOutline, trashOutline, personOutline, medicalOutline, flaskOutline, calendarOutline, timeOutline, closeOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { User } from '../../models/user.model';
+import { AppuntamentoConRelazioni } from '../../models/reservations.model';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth';
 import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
@@ -19,10 +20,10 @@ import { Subscription } from 'rxjs';
 })
 export class HomePage implements OnInit, OnDestroy {
   user: User | null = null;
-  listaAppuntamenti: any[] = [];
+  listaAppuntamenti: AppuntamentoConRelazioni[] = [];
 
   // Appuntamenti ordinati dal più prossimo al più lontano
-  get appuntamentiOrdinati(): any[] {
+  get appuntamentiOrdinati(): AppuntamentoConRelazioni[] {
     return [...this.listaAppuntamenti].sort((a, b) => {
       const dateA = `${a.data}T${a.ora}`;
       const dateB = `${b.data}T${b.ora}`;
@@ -37,26 +38,26 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   // Se la data è passata considero l'appuntamento completato
-  getStatoEffettivo(app: any): string {
+  getStatoEffettivo(app: AppuntamentoConRelazioni): string {
     if (this.isPassato(app.data) && app.stato !== 'rifiutato') {
       return 'completato';
     }
     return app.stato;
   }
 
-  get daConfermare(): any[] {
+  get daConfermare(): AppuntamentoConRelazioni[] {
     return this.appuntamentiOrdinati.filter(a => this.getStatoEffettivo(a) === 'in attesa');
   }
 
-  get confermati(): any[] {
+  get confermati(): AppuntamentoConRelazioni[] {
     return this.appuntamentiOrdinati.filter(a => this.getStatoEffettivo(a) === 'confermato');
   }
 
-  get completati(): any[] {
+  get completati(): AppuntamentoConRelazioni[] {
     return this.appuntamentiOrdinati.filter(a => this.getStatoEffettivo(a) === 'completato');
   }
 
-  get rifiutati(): any[] {
+  get rifiutati(): AppuntamentoConRelazioni[] {
     return this.appuntamentiOrdinati.filter(a => a.stato === 'rifiutato');
   }
 
@@ -124,7 +125,7 @@ export class HomePage implements OnInit, OnDestroy {
     return String(data).split('T')[0] === oggi;
   }
 
-  async apriDettaglio(appuntamento: any) {
+  async apriDettaglio(appuntamento: AppuntamentoConRelazioni) {
     // Passo alla modal l'appuntamento con lo stato effettivo
     const appuntamentoConStatoEffettivo = {
       ...appuntamento,

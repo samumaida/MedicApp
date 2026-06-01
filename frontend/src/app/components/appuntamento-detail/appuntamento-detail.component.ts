@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController } from '@ionic/angular';
+import { AppuntamentoConRelazioni } from '../../models/reservations.model';
 
 @Component({
   selector: 'app-appuntamento-detail',
@@ -23,7 +24,7 @@ import { IonicModule, ModalController } from '@ionic/angular';
       <!-- Stato appuntamento -->
       <div style="text-align: center; margin-bottom: 20px;">
         <ion-badge [color]="coloreStato" style="font-size: 1rem; padding: 8px 16px;">
-          {{ appuntamento?.stato | uppercase }}
+          {{ appuntamento.stato | uppercase }}
         </ion-badge>
       </div>
 
@@ -33,7 +34,7 @@ import { IonicModule, ModalController } from '@ionic/angular';
           <ion-icon name="person-outline" slot="start" color="primary"></ion-icon>
           <ion-label>
             <p>Paziente</p>
-            <h3>{{ appuntamento?.cliente?.nome }} {{ appuntamento?.cliente?.cognome }}</h3>
+            <h3>{{ appuntamento.cliente?.nome }} {{ appuntamento.cliente?.cognome }}</h3>
           </ion-label>
         </ion-item>
 
@@ -41,7 +42,7 @@ import { IonicModule, ModalController } from '@ionic/angular';
           <ion-icon name="medical-outline" slot="start" color="primary"></ion-icon>
           <ion-label>
             <p>Medico</p>
-            <h3>Dott. {{ appuntamento?.operatore?.nome }} {{ appuntamento?.operatore?.cognome }}</h3>
+            <h3>Dott. {{ appuntamento.operatore?.nome }} {{ appuntamento.operatore?.cognome }}</h3>
           </ion-label>
         </ion-item>
 
@@ -49,7 +50,7 @@ import { IonicModule, ModalController } from '@ionic/angular';
           <ion-icon name="flask-outline" slot="start" color="primary"></ion-icon>
           <ion-label>
             <p>Prestazione</p>
-            <h3>{{ appuntamento?.prestazione?.nome }}</h3>
+            <h3>{{ appuntamento.prestazione?.nome }}</h3>
           </ion-label>
         </ion-item>
 
@@ -57,7 +58,7 @@ import { IonicModule, ModalController } from '@ionic/angular';
           <ion-icon name="calendar-outline" slot="start" color="primary"></ion-icon>
           <ion-label>
             <p>Data</p>
-            <h3>{{ appuntamento?.data | date:'dd/MM/yyyy' }}</h3>
+            <h3>{{ appuntamento.data | date:'dd/MM/yyyy' }}</h3>
           </ion-label>
         </ion-item>
 
@@ -65,15 +66,15 @@ import { IonicModule, ModalController } from '@ionic/angular';
           <ion-icon name="time-outline" slot="start" color="primary"></ion-icon>
           <ion-label>
             <p>Orario</p>
-            <h3>{{ appuntamento?.ora }}</h3>
+            <h3>{{ appuntamento.ora }}</h3>
           </ion-label>
         </ion-item>
 
-        <ion-item *ngIf="appuntamento?.note">
+        <ion-item *ngIf="appuntamento.note">
           <ion-icon name="document-text-outline" slot="start" color="primary"></ion-icon>
           <ion-label class="ion-text-wrap">
             <p>Note</p>
-            <h3>{{ appuntamento?.note }}</h3>
+            <h3>{{ appuntamento.note }}</h3>
           </ion-label>
         </ion-item>
 
@@ -110,7 +111,7 @@ import { IonicModule, ModalController } from '@ionic/angular';
   `
 })
 export class AppuntamentoDetailComponent {
-  @Input() appuntamento: any;
+  @Input() appuntamento!: AppuntamentoConRelazioni;
   @Input() ruoloUtente: 'operatore' | 'cliente' = 'cliente';
 
   constructor(private modalCtrl: ModalController) {}

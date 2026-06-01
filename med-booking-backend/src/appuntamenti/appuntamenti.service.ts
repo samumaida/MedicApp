@@ -4,6 +4,7 @@ import { Not, Repository } from 'typeorm';
 import { Appuntamento } from './entities/appuntamento.entity';
 import { OperatorePrestazione } from '../prestazioni/entities/operatore-prestazione.entity';
 import { UserRole } from '../users/entities/user.entity';
+import { CreaAppuntamentoDto, OperatoreDisponibileDto } from './dto/appuntamenti.dto';
 
 @Injectable()
 export class AppuntamentiService {
@@ -14,7 +15,7 @@ export class AppuntamentiService {
     private readonly operatorePrestazioneRepository: Repository<OperatorePrestazione>,
   ) {}
 
-  async creaAppuntamento(dati: any) {
+  async creaAppuntamento(dati: CreaAppuntamentoDto) {
     /** 
      * Controllo che l'operatore non abbia già un appuntamento
      * attivo nello stesso giorno e alla stessa ora
@@ -87,7 +88,7 @@ export class AppuntamentiService {
         }
       });
 
-      const risultati: any[] = [];
+      const risultati: OperatoreDisponibileDto[] = [];
 
       for (const assoc of associazioni) {
         const medico = assoc.operatore;
