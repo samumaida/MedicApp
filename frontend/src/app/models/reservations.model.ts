@@ -5,4 +5,12 @@ export interface Prestazione {
   categoria?: string;
   prezzo?: number;
   descrizione?: string;
+  durataMinuti?: number;
+}
+
+export interface Categoria {
+  id: string;
+  nome: string;
+  immagine?: string;
+  prestazioni: Prestazione[];
 }

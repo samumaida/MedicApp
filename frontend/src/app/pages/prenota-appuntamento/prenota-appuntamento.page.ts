@@ -4,7 +4,7 @@ import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { medicalOutline, chevronForwardOutline, arrowBackOutline } from 'ionicons/icons';
-import { Prestazione } from '../../models/reservations.model';
+import { Prestazione, Categoria } from '../../models/reservations.model';
 import { FormsModule } from '@angular/forms';
 import { PrestazioniApiService } from '../../services/prestazioni-api.service';
 import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
@@ -30,8 +30,8 @@ export class PrenotaAppuntamentoPage implements OnInit {
 
   categoriaSelezionataId: string = '';
   testoCercato: string = '';
-  categorieFiltrate: any[] = [];
-  categoriePrestazioni: any[] = [];
+  categorieFiltrate: Categoria[] = [];
+  categoriePrestazioni: Categoria[] = [];
 
   constructor(
     private authService: AuthService,
@@ -52,7 +52,7 @@ export class PrenotaAppuntamentoPage implements OnInit {
     this.prestazioniApiService.getCategorie().subscribe({
       next: (categorie) => {
         // Inizializzo ogni categoria con un array vuoto di prestazioni
-        this.categoriePrestazioni = categorie.map(cat => ({ ...cat, prestazioni: [] }));
+        this.categoriePrestazioni = categorie.map(cat => ({ ...cat, prestazioni: [] as Prestazione[] }));
         this.caricaPrestazioniDalDb();
       },
       error: (err) => {

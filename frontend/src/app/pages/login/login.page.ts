@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
+import { RegisterData } from '../../models/user.model';
 import { addIcons } from 'ionicons';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
 
@@ -23,15 +24,15 @@ export class LoginPage implements OnInit {
     password: ''
   };
 
-  registerData = {
+  registerData: RegisterData = {
     nome: '',
     cognome: '',
-    codiceFiscale: '',
-    dataNascita: '',
-    sesso: 'M',
     email: '',
     password: '',
-    ruolo: 'cliente'
+    ruolo: 'cliente',
+    codiceFiscale: '',
+    dataNascita: '',
+    sesso: 'M'
   };
 
   showPassword = false;

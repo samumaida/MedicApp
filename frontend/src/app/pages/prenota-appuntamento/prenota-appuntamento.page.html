@@ -37,7 +37,7 @@
               <ion-item slot="header" color="light" lines="none">
                 <ion-avatar slot="start" class="categoria-avatar">
                   <!-- Percorso pulito e corretto per la cartella assets globale -->
-                  <img src="assets/images/Pediatria.png" [alt]="cat.nome" (error)="$any($event.target).src = 'assets/icon/favicon.png'" />
+                  <img [src]="cat.immagine ? cat.immagine : 'assets/images/Pediatria.png'" [alt]="cat.nome" (error)="$any($event.target).src = 'assets/icon/favicon.png'" />
                 </ion-avatar>
                 
                 <ion-label>
