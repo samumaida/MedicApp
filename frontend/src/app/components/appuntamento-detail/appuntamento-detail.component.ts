@@ -128,8 +128,12 @@ import { AppuntamentiApiService } from '../../services/appuntamenti-api.service'
         <ng-container *ngIf="ruoloUtente === 'operatore' && appuntamento.stato === 'completato'">
           <div style="border-top: 1px solid var(--ion-color-light); padding-top: 10px;">
             <p style="font-size: 0.85rem; color: var(--ion-color-medium); margin-bottom: 6px;">
-              {{ appuntamento.refertoUrl ? 'Referto già caricato — puoi sostituirlo:' : 'Carica il referto della visita (PDF):' }}
+              {{ appuntamento.refertoUrl ? 'Referto già caricato, visualizzalo o sostituiscilo:' : 'Carica il referto della visita (PDF):' }}
             </p>
+            <ion-button *ngIf="appuntamento.refertoUrl" expand="block" color="secondary" fill="outline" (click)="visualizzaReferto()">
+              <ion-icon name="eye-outline" slot="start"></ion-icon>
+              Visualizza Referto
+            </ion-button>
             <input #fileInput type="file" accept="application/pdf" style="display:none" (change)="onRefertoSelezionato($event)">
             <ion-button expand="block" color="tertiary" fill="outline" (click)="fileInput.click()">
               <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>

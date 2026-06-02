@@ -94,6 +94,14 @@
                 <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
                 <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
               </ion-label>
+              <ion-icon
+                *ngIf="app.refertoUrl"
+                name="document-text-outline"
+                slot="end"
+                color="secondary"
+                title="Referto disponibile"
+                style="margin-right: 6px;">
+              </ion-icon>
               <ion-badge slot="end" color="primary">completato</ion-badge>
             </ion-item>
           </ion-list>

@@ -185,7 +185,7 @@ export class PrenotaAppuntamentoPage implements OnInit {
       next: async (res) => {
         if (res.success) {
           const toast = await this.toastCtrl.create({
-            message: `Appuntamento richiesto con successo. In attesa di approvazione del medico.`,
+            message: `Appuntamento richiesto con successo. In attesa di approvazione dal medico.`,
             duration: 3500,
             color: 'success',
             position: 'bottom'
