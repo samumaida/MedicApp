@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { addIcons } from 'ionicons';
-import { cloudUploadOutline, checkmarkOutline } from 'ionicons/icons';
+import { cloudUploadOutline, checkmarkOutline, eyeOutline, downloadOutline } from 'ionicons/icons';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 import { AppuntamentoConRelazioni } from '../../models/reservations.model';
@@ -107,6 +107,23 @@ import { AppuntamentiApiService } from '../../services/appuntamenti-api.service'
           Elimina prenotazione
         </ion-button>
 
+        <!-- Visualizza/Scarica referto, visibile solo al cliente se il referto è disponibile -->
+        <ng-container *ngIf="ruoloUtente === 'cliente' && appuntamento.refertoUrl">
+          <div style="border-top: 1px solid var(--ion-color-light); padding-top: 10px;">
+            <p style="font-size: 0.85rem; color: var(--ion-color-medium); margin-bottom: 6px;">Referto disponibile:</p>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <ion-button fill="solid" color="secondary" (click)="visualizzaReferto()">
+                <ion-icon name="eye-outline" slot="start"></ion-icon>
+                Visualizza
+              </ion-button>
+              <ion-button fill="outline" color="primary" (click)="scaricaReferto()">
+                <ion-icon name="download-outline" slot="start"></ion-icon>
+                Scarica
+              </ion-button>
+            </div>
+          </div>
+        </ng-container>
+
         <!-- Upload referto visibile solo dall'operatore sugli appuntamenti completati -->
         <ng-container *ngIf="ruoloUtente === 'operatore' && appuntamento.stato === 'completato'">
           <div style="border-top: 1px solid var(--ion-color-light); padding-top: 10px;">
@@ -146,7 +163,7 @@ export class AppuntamentoDetailComponent {
     private toastCtrl: ToastController,
     private appuntamentiApiService: AppuntamentiApiService
   ) {
-    addIcons({ cloudUploadOutline, checkmarkOutline });
+    addIcons({ cloudUploadOutline, checkmarkOutline, eyeOutline, downloadOutline });
   }
 
   get coloreStato(): string {
@@ -202,6 +219,23 @@ export class AppuntamentoDetailComponent {
       },
       error: () => this.mostraToast('Errore durante il caricamento del referto.', 'danger')
     });
+  }
+
+  private readonly backendUrl = 'http://localhost:3000';
+
+  visualizzaReferto() {
+    if (this.appuntamento.refertoUrl) {
+      window.open(`${this.backendUrl}${this.appuntamento.refertoUrl}`, '_blank');
+    }
+  }
+
+  scaricaReferto() {
+    if (this.appuntamento.refertoUrl) {
+      const link = document.createElement('a');
+      link.href = `${this.backendUrl}${this.appuntamento.refertoUrl}`;
+      link.download = this.appuntamento.refertoUrl.split('/').pop() ?? 'referto.pdf';
+      link.click();
+    }
   }
 
   private async mostraToast(messaggio: string, colore: string) {

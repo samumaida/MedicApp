@@ -148,6 +148,14 @@
           <h3>{{ app.prestazione?.nome }}</h3>
           <p>Dott. {{ app.operatore?.nome }} {{ app.operatore?.cognome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
         </ion-label>
+        <ion-icon
+          *ngIf="app.refertoUrl"
+          name="document-text-outline"
+          slot="end"
+          color="secondary"
+          title="Referto disponibile"
+          style="margin-right: 6px;">
+        </ion-icon>
         <ion-badge slot="end"
           [color]="getStatoEffettivo(app) === 'confermato' ? 'success'
                  : getStatoEffettivo(app) === 'completato' ? 'primary'
