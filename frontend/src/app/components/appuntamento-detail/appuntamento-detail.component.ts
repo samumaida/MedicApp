@@ -1,7 +1,10 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { addIcons } from 'ionicons';
+import { cloudUploadOutline, checkmarkOutline } from 'ionicons/icons';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ModalController } from '@ionic/angular';
+import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 import { AppuntamentoConRelazioni } from '../../models/reservations.model';
+import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
 
 @Component({
   selector: 'app-appuntamento-detail',
@@ -104,6 +107,27 @@ import { AppuntamentoConRelazioni } from '../../models/reservations.model';
           Elimina prenotazione
         </ion-button>
 
+        <!-- Upload referto visibile solo dall'operatore sugli appuntamenti completati -->
+        <ng-container *ngIf="ruoloUtente === 'operatore' && appuntamento.stato === 'completato'">
+          <div style="border-top: 1px solid var(--ion-color-light); padding-top: 10px;">
+            <p style="font-size: 0.85rem; color: var(--ion-color-medium); margin-bottom: 6px;">
+              {{ appuntamento.refertoUrl ? 'Referto già caricato — puoi sostituirlo:' : 'Carica il referto della visita (PDF):' }}
+            </p>
+            <input #fileInput type="file" accept="application/pdf" style="display:none" (change)="onRefertoSelezionato($event)">
+            <ion-button expand="block" color="tertiary" fill="outline" (click)="fileInput.click()">
+              <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+              {{ appuntamento.refertoUrl ? 'Sostituisci Referto' : 'Carica Referto' }}
+            </ion-button>
+            <p *ngIf="nomeFileSelezionato" style="font-size: 0.8rem; color: var(--ion-color-medium); margin-top: 4px; text-align: center;">
+              {{ nomeFileSelezionato }}
+            </p>
+            <ion-button *ngIf="fileSelezionato" expand="block" color="success" (click)="confermaUpload()">
+              <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+              Conferma Upload
+            </ion-button>
+          </div>
+        </ng-container>
+
         <ion-button expand="block" fill="clear" (click)="chiudi()">Chiudi</ion-button>
 
       </div>
@@ -114,7 +138,16 @@ export class AppuntamentoDetailComponent {
   @Input() appuntamento!: AppuntamentoConRelazioni;
   @Input() ruoloUtente: 'operatore' | 'cliente' = 'cliente';
 
-  constructor(private modalCtrl: ModalController) {}
+  fileSelezionato: File | null = null;
+  nomeFileSelezionato = '';
+
+  constructor(
+    private modalCtrl: ModalController,
+    private toastCtrl: ToastController,
+    private appuntamentiApiService: AppuntamentiApiService
+  ) {
+    addIcons({ cloudUploadOutline, checkmarkOutline });
+  }
 
   get coloreStato(): string {
     switch (this.appuntamento?.stato) {
@@ -139,5 +172,45 @@ export class AppuntamentoDetailComponent {
 
   chiudi() {
     this.modalCtrl.dismiss(null);
+  }
+
+  onRefertoSelezionato(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const maxSizeMB = 10;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      this.mostraToast(`File troppo grande. Massimo consentito: ${maxSizeMB} MB.`, 'warning');
+      return;
+    }
+
+    this.fileSelezionato = file;
+    this.nomeFileSelezionato = file.name;
+  }
+
+  confermaUpload() {
+    if (!this.fileSelezionato) return;
+
+    this.appuntamentiApiService.uploadReferto(this.appuntamento.id, this.fileSelezionato).subscribe({
+      next: (res) => {
+        this.appuntamento.refertoUrl = res.refertoUrl;
+        this.fileSelezionato = null;
+        this.nomeFileSelezionato = '';
+        this.mostraToast('Referto caricato con successo.', 'success');
+        this.modalCtrl.dismiss({ azione: 'referto_caricato', refertoUrl: res.refertoUrl });
+      },
+      error: () => this.mostraToast('Errore durante il caricamento del referto.', 'danger')
+    });
+  }
+
+  private async mostraToast(messaggio: string, colore: string) {
+    const toast = await this.toastCtrl.create({
+      message: messaggio,
+      duration: 2500,
+      color: colore,
+      position: 'bottom'
+    });
+    toast.present();
   }
 }

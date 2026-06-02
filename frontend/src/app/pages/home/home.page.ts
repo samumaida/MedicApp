@@ -201,14 +201,21 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
-  visualizzaReferto(url: string) {
-    window.open(`assets/mock-pdf/${url}`, '_blank');
+  private readonly backendUrl = 'http://localhost:3000';
+
+  // Restituisce solo gli appuntamenti che hanno un referto caricato
+  get appuntamentiConReferto(): AppuntamentoConRelazioni[] {
+    return this.listaAppuntamenti.filter(app => !!app.refertoUrl);
   }
 
-  scaricaReferto(url: string) {
+  visualizzaReferto(refertoUrl: string) {
+    window.open(`${this.backendUrl}${refertoUrl}`, '_blank');
+  }
+
+  scaricaReferto(refertoUrl: string) {
     const link = document.createElement('a');
-    link.href = `assets/mock-pdf/${url}`;
-    link.download = url;
+    link.href = `${this.backendUrl}${refertoUrl}`;
+    link.download = refertoUrl.split('/').pop() ?? 'referto.pdf';
     link.click();
   }
 

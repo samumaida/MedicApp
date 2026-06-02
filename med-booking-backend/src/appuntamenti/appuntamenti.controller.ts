@@ -1,5 +1,8 @@
-import { Controller, Post, Body, Get, Param, Patch, Delete, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { Controller, Post, Body, Get, Param, Patch, Delete, Query, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiConsumes } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
 import { AppuntamentiService } from './appuntamenti.service';
 
 @ApiTags('Appuntamenti')
@@ -51,6 +54,36 @@ export class AppuntamentiController {
   ) {
     await this.appuntamentiService.aggiornaStato(id, stato);
     return { success: true, message: 'Stato aggiornato con successo!' };
+  }
+
+  @ApiOperation({ summary: 'Carica il referto PDF di un appuntamento completato (disponibile solo all\'operatore)' })
+  @ApiConsumes('multipart/form-data')
+  @Patch(':id/referto')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: join(__dirname, '..', '..', 'uploads', 'referti'),
+      filename: (req, file, cb) => {
+        const uniqueName = `${req.params['id']}-${Date.now()}${extname(file.originalname)}`;
+        cb(null, uniqueName);
+      }
+    }),
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype === 'application/pdf') {
+        cb(null, true);
+      } else {
+        cb(new BadRequestException('Solo file PDF sono accettati.'), false);
+      }
+    },
+    limits: { fileSize: 10 * 1024 * 1024 } // 10 MB
+  }))
+  async uploadReferto(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (!file) throw new BadRequestException('Nessun file ricevuto.');
+    const refertoUrl = `/uploads/referti/${file.filename}`;
+    await this.appuntamentiService.salvaReferto(id, refertoUrl);
+    return { success: true, refertoUrl };
   }
 
   @ApiOperation({ summary: 'Elimina un appuntamento' })

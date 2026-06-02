@@ -23,6 +23,10 @@ export class Appuntamento {
   @Column({ type: 'text', nullable: true })
   note?: string;
 
+  // Percorso del referto caricato dall'operatore dopo la visita
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  refertoUrl?: string;
+
   // Relazione con il cliente
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   cliente!: User;

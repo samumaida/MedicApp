@@ -46,6 +46,12 @@ export class AppuntamentiApiService {
     return this.http.get<AppuntamentoConRelazioni[]>(`${this.apiUrl}/operatore/${operatoreId}`);
   }
 
+  uploadReferto(id: string, file: File): Observable<{ success: boolean; refertoUrl: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.patch<{ success: boolean; refertoUrl: string }>(`${this.apiUrl}/${id}/referto`, formData);
+  }
+
   patchStatoAppuntamento(id: string, stato: 'confermato' | 'rifiutato'): Observable<RispostaSuccesso> {
     return this.http.patch<RispostaSuccesso>(`${this.apiUrl}/${id}/stato`, { stato });
   }

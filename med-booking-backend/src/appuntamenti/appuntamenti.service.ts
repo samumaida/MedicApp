@@ -152,6 +152,16 @@ export class AppuntamentiService {
     return await this.appuntamentoRepository.save(appuntamento);
   }
 
+  // Salva il percorso del referto caricato dall'operatore
+  async salvaReferto(id: string, refertoUrl: string): Promise<void> {
+    const appuntamento = await this.appuntamentoRepository.findOne({ where: { id } });
+    if (!appuntamento) {
+      throw new BadRequestException('Appuntamento non trovato.');
+    }
+    appuntamento.refertoUrl = refertoUrl;
+    await this.appuntamentoRepository.save(appuntamento);
+  }
+
   async elimina(id: string): Promise<void> {
     const risultato = await this.appuntamentoRepository.delete(id);
     
