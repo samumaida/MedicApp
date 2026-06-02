@@ -74,14 +74,4 @@ export class PrestazioniApiService {
     return this.http.post<RispostaSalvaPrestazioni>(`${this.apiUrl}/aggiorna-operatore/${operatoreId}`, payload);
   }
 
-  salvaImpostazioniProfilo(id: string, specializzazione: string, orariLavoro: TurnoDisponibile[]): Observable<RispostaSuccesso> {
-    return this.http.patch<RispostaSuccesso>(`${this.apiUrl}/operatore/${id}/impostazioni-profilo`, {
-      specializzazione,
-      orariLavoro
-    });
-  }
-
-  getProfiloOperatore(id: string): Observable<ProfiloOperatoreDto> {
-    return this.http.get<ProfiloOperatoreDto>(`${this.apiUrl}/operatore/${id}/profilo`);
-  }
 }

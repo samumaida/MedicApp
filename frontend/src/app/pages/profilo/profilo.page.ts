@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
-import { PrestazioniApiService } from '../../services/prestazioni-api.service';
+import { ProfiloApiService } from '../../services/profilo-api.service';
 import { AuthService } from '../../services/auth';
 import { PaginaConModifiche } from '../../guards/unsaved-changes.guard';
 import { Subscription } from 'rxjs';
@@ -32,7 +32,7 @@ export class ProfiloPage implements OnInit, OnDestroy, PaginaConModifiche {
   ];
 
   constructor(
-    private prestazioniApiService: PrestazioniApiService,
+    private profiloApiService: ProfiloApiService,
     private authService: AuthService, // <--- Iniettiamo l'AuthService reale
     private toastController: ToastController
   ) { }
@@ -59,7 +59,7 @@ export class ProfiloPage implements OnInit, OnDestroy, PaginaConModifiche {
    * Chiamata HTTP per recupperare i dati dell'operatore
    */
   caricaDatiProfiloDalDB(idUtente: string) {
-    this.prestazioniApiService.getProfiloOperatore(idUtente).subscribe({
+    this.profiloApiService.getProfiloOperatore(idUtente).subscribe({
       next: (datiDB) => {
         if (this.utente) {
           this.utente.specializzazione = datiDB.specializzazione;
@@ -113,7 +113,7 @@ export class ProfiloPage implements OnInit, OnDestroy, PaginaConModifiche {
         fine: g.fine
       }));
 
-    this.prestazioniApiService.salvaImpostazioniProfilo(
+    this.profiloApiService.salvaImpostazioniProfilo(
       this.utente.id, 
       this.utente.specializzazione || '', 
       turniFinali

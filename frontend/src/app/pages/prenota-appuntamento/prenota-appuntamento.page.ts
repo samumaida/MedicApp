@@ -136,13 +136,13 @@ export class PrenotaAppuntamentoPage implements OnInit {
       this.dataSelezionata
     ).subscribe({
       next: (operatori: OperatoreDisponibile[]) => {
-        // Postgres restituisce già solo i medici compatibili, attivi e con prezzi/durate corretti
+        // Postgres restituisce già solo gli operatori compatibili, attivi e con prezzi/durate corretti
         this.operatoriFiltrati = operatori;
         
         this.step = 3;
       },
       error: (err: any) => {
-        console.error('Errore durante il recupero dei medici dal DB:', err);
+        console.error('Errore durante il recupero degli operatori dal DB:', err);
       }
     });
   }
