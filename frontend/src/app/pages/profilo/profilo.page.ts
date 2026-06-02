@@ -6,7 +6,7 @@ import { PrestazioniApiService } from '../../services/prestazioni-api.service';
 import { AuthService } from '../../services/auth';
 import { PaginaConModifiche } from '../../guards/unsaved-changes.guard';
 import { Subscription } from 'rxjs';
-import { User } from '../../models/user.model';
+import { User, TurnoDisponibile } from '../../models/user.model';
 
 @Component({
   selector: 'app-profilo',
@@ -80,7 +80,7 @@ export class ProfiloPage implements OnInit, OnDestroy, PaginaConModifiche {
     if (this.utente && this.utente.giorniDisponibili && Array.isArray(this.utente.giorniDisponibili)) {
       this.giorniSettimana.forEach(g => g.selezionato = false);
 
-      this.utente.giorniDisponibili.forEach((turno: any) => {
+      this.utente.giorniDisponibili.forEach((turno: TurnoDisponibile) => {
         const giornoTrovato = this.giorniSettimana.find(g => g.id === turno.giorno);
         if (giornoTrovato) {
           giornoTrovato.selezionato = true;

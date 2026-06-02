@@ -7,6 +7,7 @@ import { User } from '../users/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { OperatorePrestazione } from './entities/operatore-prestazione.entity';
 import { Categoria } from './entities/categoria.entity';
+import { TurnoDisponibile } from '../common/types';
 
 // Interfaccia DTO temporanea per "tipizzare" il body in arrivo dal frontend
 interface AggiornaPrestazioniDto {
@@ -111,7 +112,7 @@ export class PrestazioniController {
   @Patch('operatore/:id/impostazioni-profilo')
   async aggiornaImpostazioniProfilo(
     @Param('id') id: string,
-    @Body() body: { specializzazione: string; orariLavoro: any[] }
+    @Body() body: { specializzazione: string; orariLavoro: TurnoDisponibile[] }
   ) {
     return await this.prestazioniService.salvaProfiloMedico(id, body.specializzazione, body.orariLavoro);
   }

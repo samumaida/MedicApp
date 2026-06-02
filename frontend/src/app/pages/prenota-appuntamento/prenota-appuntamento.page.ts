@@ -4,7 +4,7 @@ import { IonicModule, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { medicalOutline, chevronForwardOutline, arrowBackOutline } from 'ionicons/icons';
-import { Prestazione, Categoria } from '../../models/reservations.model';
+import { Prestazione, Categoria, OperatoreDisponibile } from '../../models/reservations.model';
 import { FormsModule } from '@angular/forms';
 import { PrestazioniApiService } from '../../services/prestazioni-api.service';
 import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
@@ -22,7 +22,7 @@ export class PrenotaAppuntamentoPage implements OnInit {
   step: number = 1;
   
   listaPrestazioni: Prestazione[] = [];
-  operatoriFiltrati: any[] = [];
+  operatoriFiltrati: OperatoreDisponibile[] = [];
   
   prestazioneScelta: Prestazione | null = null;
   dataSelezionata: string = '';
@@ -100,7 +100,7 @@ export class PrenotaAppuntamentoPage implements OnInit {
         return cat;
       }
 
-      const esamiFiltrati = cat.prestazioni.filter((p: any) => 
+      const esamiFiltrati = cat.prestazioni.filter((p: Prestazione) =>
         p.nome.toLowerCase().includes(query) || 
         (p.descrizione && p.descrizione.toLowerCase().includes(query))
       );
@@ -136,11 +136,9 @@ export class PrenotaAppuntamentoPage implements OnInit {
       String(this.prestazioneScelta.id),
       this.dataSelezionata
     ).subscribe({
-      next: (operatori: any[]) => {
+      next: (operatori: OperatoreDisponibile[]) => {
         // Postgres restituisce già solo i medici compatibili, attivi e con prezzi/durate corretti
         this.operatoriFiltrati = operatori;
-        
-        console.debug('Operatori trovati sul DB per questo giorno:', this.operatoriFiltrati);
         
         this.step = 3;
       },
@@ -154,7 +152,7 @@ export class PrenotaAppuntamentoPage implements OnInit {
     this.step = targetStep;
   }
 
-  async confermaPrenotazione(operatore: any, ora: string) {
+  async confermaPrenotazione(operatore: OperatoreDisponibile, ora: string) {
     // Recupero l'utente loggato
     const utenteCorrente = await firstValueFrom(this.authService.currentUser$);
     

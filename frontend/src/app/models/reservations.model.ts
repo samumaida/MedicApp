@@ -1,5 +1,5 @@
 export interface Prestazione {
-  id: string | number;
+  id: string;
   nome: string;
   categoriaId?: string;
   categoria?: string;
@@ -8,10 +8,14 @@ export interface Prestazione {
   durataMinuti?: number;
 }
 
-export interface Categoria {
+// Categoria senza prestazioni usata nei picker e nelle liste di selezione
+export interface CategoriaMinima {
   id: string;
   nome: string;
   immagine?: string;
+}
+
+export interface Categoria extends CategoriaMinima {
   prestazioni: Prestazione[];
 }
 
@@ -30,6 +34,25 @@ export interface OperatoreDisponibile {
   prezzo: number;
   durataMinuti: number;
   orari: string[];
+}
+
+// Interfaccia usata nella modal di personalizzazione prestazione
+export interface PrestazioneInModifica {
+  id: string | number;
+  nome: string;
+  durataMinuti: number;
+  prezzo: number;
+}
+
+// Interfaccia usata nella modal admin per creare o modificare una prestazione nel catalogo
+export interface PrestazioneAdminForm {
+  id?: string;
+  nome: string;
+  descrizione?: string;
+  categoriaId: string;
+  categoriaNome?: string;
+  durataMinuti: number;
+  prezzo: number;
 }
 
 // Risposta generica di successo dal backend

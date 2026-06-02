@@ -1,4 +1,5 @@
 import { Injectable, OnModuleInit, BadRequestException } from '@nestjs/common';
+import { TurnoDisponibile } from '../common/types';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Prestazione } from './entities/prestazione.entity';
@@ -104,7 +105,7 @@ export class PrestazioniService implements OnModuleInit {
         });
     }
 
-  async salvaProfiloMedico(id: string, specializzazione: string, orariLavoro: any[]) {
+  async salvaProfiloMedico(id: string, specializzazione: string, orariLavoro: TurnoDisponibile[]) {
     try {
       await this.prestazioneRepository.manager.update(
         'User', 

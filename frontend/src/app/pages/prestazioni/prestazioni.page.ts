@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { Subscription, take } from 'rxjs';
 import { AuthService } from '../../services/auth';
+import { User, OperatorePrestazione } from '../../models/user.model';
+import { Prestazione, Categoria, CategoriaMinima, PrestazioneInModifica, PrestazioneAdminForm } from '../../models/reservations.model';
 import { PrestazioniApiService } from '../../services/prestazioni-api.service';
 import { PaginaConModifiche } from '../../guards/unsaved-changes.guard';
 import { addIcons } from 'ionicons';
@@ -17,21 +19,21 @@ import { pencilOutline, trashOutline, addOutline, folderOutline, chevronForwardO
   imports: [IonicModule, CommonModule, FormsModule]
 })
 export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
-  operatoreLoggato: any = null;
-  catalogoPrestazioni: any[] = [];
+  operatoreLoggato: User | null = null;
+  catalogoPrestazioni: Prestazione[] = [];
 
   prestazioniSelezionate: { [key: string]: { attiva: boolean; durataMinuti: number; prezzo: number } } = {};
 
   testoCercato: string = '';
   isModalOpen = false;
-  prestazioneInModifica: any = null;
+  prestazioneInModifica: PrestazioneInModifica | null = null;
 
   modificheNonSalvate = false;
 
   private authSub!: Subscription;
 
   // Modal prestazione admin
-  modalAdmin: any = null;
+  modalAdmin: PrestazioneAdminForm | null = null;
   isModalAdminOpen = false;
   isNuovaPrestazione = false;
 
@@ -39,7 +41,7 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
 
   // Picker per selezione categoria in creazione/modifica prestazione
   isCategoriaPickerOpen = false;
-  categoriePickerFiltrate: { id: string; nome: string }[] = [];
+  categoriePickerFiltrate: CategoriaMinima[] = [];
   testoCercatoCategoria = '';
 
   // Modal per gestione categorie
@@ -85,7 +87,7 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
     });
   }
 
-  get prestazioniFiltrate(): any[] {
+  get prestazioniFiltrate(): Prestazione[] {
     if (!this.testoCercato || this.testoCercato.trim() === '') {
       return this.catalogoPrestazioni;
     }
@@ -105,14 +107,14 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
   this.catalogoPrestazioni.forEach(p => {
     this.prestazioniSelezionate[p.id] = {
       attiva: false,
-      durataMinuti: p.durataMinuti,
-      prezzo: p.prezzo
+      durataMinuti: p.durataMinuti ?? 30,
+      prezzo: p.prezzo ?? 0
     };
   });
 
   // Se l'operatore ha già personalizzazioni nel DB, sovrascrivo l'inizializzazione
   if (this.operatoreLoggato && this.operatoreLoggato.operatorePrestazioni) {
-    this.operatoreLoggato.operatorePrestazioni.forEach((op: any) => {
+    this.operatoreLoggato.operatorePrestazioni.forEach((op: OperatorePrestazione) => {
       
       // Verifico che l'oggetto della prestazione relazionata esista per evitare crash indotti da dati sporchi
       if (op.prestazione && op.prestazione.id) {
@@ -127,7 +129,7 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
   }
 }
 
-  apriModalModifica(prestazione: any) {
+  apriModalModifica(prestazione: Prestazione) {
     const datiAttuali = this.prestazioniSelezionate[prestazione.id];
 
     // Creiamo un oggetto temporaneo per il modal in modo da non cambiare
@@ -183,7 +185,7 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
       }));
 
     // Passo l'array di oggetti al servizio
-    this.prestazioniApiService.salvaPrestazioniOperatore(this.operatoreLoggato.id, { prestazioni: datiDaSalvare }).subscribe({
+    this.prestazioniApiService.salvaPrestazioniOperatore(this.operatoreLoggato!.id, { prestazioni: datiDaSalvare }).subscribe({
       next: (res) => {
         if (res.success) {
           this.modificheNonSalvate = false;
@@ -215,8 +217,15 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
     this.isModalAdminOpen = true;
   }
 
-  apriModalModificaAdmin(prestazione: any) {
-    this.modalAdmin = { ...prestazione };
+  apriModalModificaAdmin(prestazione: Prestazione) {
+    this.modalAdmin = {
+      id: prestazione.id,
+      nome: prestazione.nome,
+      descrizione: prestazione.descrizione,
+      categoriaId: prestazione.categoriaId ?? '',
+      durataMinuti: prestazione.durataMinuti ?? 30,
+      prezzo: prestazione.prezzo ?? 0
+    };
     this.isNuovaPrestazione = false;
     this.isModalAdminOpen = true;
   }
@@ -250,7 +259,7 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
 
     const operazione$ = this.isNuovaPrestazione
       ? this.prestazioniApiService.creaPrestazioneAdmin(datiDaInviare)
-      : this.prestazioniApiService.aggiornaPrestazioneAdmin(this.modalAdmin.id, datiDaInviare);
+      : this.prestazioniApiService.aggiornaPrestazioneAdmin(this.modalAdmin.id!, datiDaInviare);
 
     operazione$.subscribe({
       next: () => {
@@ -344,7 +353,7 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
     reader.readAsDataURL(file);
   }
 
-  avviaModificaCategoria(cat: any) {
+  avviaModificaCategoria(cat: CategoriaMinima) {
     this.nuovaCategoria = { id: cat.id, nome: cat.nome, immagine: cat.immagine || '' };
     this.immaginePreview = cat.immagine || '';
     this.isModificaCategoria = true;
@@ -354,7 +363,7 @@ export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
     this.ngZone.onStable.pipe(take(1)).subscribe(() => {
       const modalContent = document.querySelector('ion-modal ion-content');
       if (modalContent) {
-        (modalContent as any).scrollToTop(300);
+        (modalContent as HTMLElement & { scrollToTop: (duration: number) => void }).scrollToTop(300);
       }
     });
   }

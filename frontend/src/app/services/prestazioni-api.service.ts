@@ -1,13 +1,37 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Prestazione } from '../models/reservations.model';
+import { Prestazione, CategoriaMinima, RispostaSuccesso } from '../models/reservations.model';
+import { User, TurnoDisponibile } from '../models/user.model';
+
+// Riga inviata al backend per abilitare una prestazione con i valori personalizzati dell'operatore
+export interface PrestazioneOperatoreDto {
+  prestazioneId: string;
+  durataMinuti: number;
+  prezzo: number;
+}
+
+// Risposta del backend dopo il salvataggio delle prestazioni dell'operatore
+export interface RispostaSalvaPrestazioni extends RispostaSuccesso {
+  user: User;
+}
+
+// Dati del profilo medico restituiti dal backend
+export interface ProfiloMedicoDto {
+  id: string;
+  nome: string;
+  cognome: string;
+  email: string;
+  ruolo: string;
+  specializzazione?: string;
+  giorniDisponibili: TurnoDisponibile[];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class PrestazioniApiService {
-  private apiUrl = 'http://localhost:3000/prestazioni'; 
+  private apiUrl = 'http://localhost:3000/prestazioni';
 
   constructor(private http: HttpClient) {}
 
@@ -15,48 +39,49 @@ export class PrestazioniApiService {
     return this.http.get<Prestazione[]>(this.apiUrl);
   }
 
-  getCategorie(): Observable<{ id: string; nome: string; immagine: string }[]> {
-    return this.http.get<{ id: string; nome: string; immagine: string }[]>(`${this.apiUrl}/categorie`);
+  getCategorie(): Observable<CategoriaMinima[]> {
+    return this.http.get<CategoriaMinima[]>(`${this.apiUrl}/categorie`);
   }
 
-  creaCategoriaAdmin(dati: { id: string; nome: string; immagine?: string }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/categorie`, dati);
+  // Metodi admin — Categorie
+  creaCategoriaAdmin(dati: CategoriaMinima): Observable<CategoriaMinima> {
+    return this.http.post<CategoriaMinima>(`${this.apiUrl}/categorie`, dati);
   }
 
-  aggiornaCategoriaAdmin(id: string, dati: { id?: string; nome?: string; immagine?: string }): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/categorie/${id}`, dati);
+  aggiornaCategoriaAdmin(id: string, dati: Partial<CategoriaMinima>): Observable<CategoriaMinima> {
+    return this.http.patch<CategoriaMinima>(`${this.apiUrl}/categorie/${id}`, dati);
   }
 
-  eliminaCategoriaAdmin(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/categorie/${id}`);
+  eliminaCategoriaAdmin(id: string): Observable<RispostaSuccesso> {
+    return this.http.delete<RispostaSuccesso>(`${this.apiUrl}/categorie/${id}`);
   }
 
-  creaPrestazioneAdmin(dati: { nome: string; descrizione?: string; categoriaId: string; durataMinuti: number; prezzo: number }): Observable<any> {
-    return this.http.post<any>(this.apiUrl, dati);
+  // Metodi admin — Prestazioni
+  creaPrestazioneAdmin(dati: Omit<Prestazione, 'id'>): Observable<Prestazione> {
+    return this.http.post<Prestazione>(this.apiUrl, dati);
   }
 
-  aggiornaPrestazioneAdmin(id: string, dati: Partial<{ nome: string; descrizione: string; categoriaId: string; durataMinuti: number; prezzo: number }>): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/${id}`, dati);
+  aggiornaPrestazioneAdmin(id: string, dati: Partial<Prestazione>): Observable<Prestazione> {
+    return this.http.patch<Prestazione>(`${this.apiUrl}/${id}`, dati);
   }
 
-  eliminaPrestazioneAdmin(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`);
+  eliminaPrestazioneAdmin(id: string): Observable<RispostaSuccesso> {
+    return this.http.delete<RispostaSuccesso>(`${this.apiUrl}/${id}`);
   }
 
-  salvaPrestazioniOperatore(operatoreId: string, payload: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/aggiorna-operatore/${operatoreId}`, payload);
+  // Metodi operatore
+  salvaPrestazioniOperatore(operatoreId: string, payload: { prestazioni: PrestazioneOperatoreDto[] }): Observable<RispostaSalvaPrestazioni> {
+    return this.http.post<RispostaSalvaPrestazioni>(`${this.apiUrl}/aggiorna-operatore/${operatoreId}`, payload);
   }
 
-  salvaImpostazioniProfilo(id: string, specializzazione: string, orariLavoro: any[]): Observable<any> {
-    const body = {
+  salvaImpostazioniProfilo(id: string, specializzazione: string, orariLavoro: TurnoDisponibile[]): Observable<RispostaSuccesso> {
+    return this.http.patch<RispostaSuccesso>(`${this.apiUrl}/operatore/${id}/impostazioni-profilo`, {
       specializzazione,
       orariLavoro
-    };
-    
-    return this.http.patch<any>(`${this.apiUrl}/operatore/${id}/impostazioni-profilo`, body);
+    });
   }
 
-  getProfiloMedico(id: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/operatore/${id}/profilo`);
+  getProfiloMedico(id: string): Observable<ProfiloMedicoDto> {
+    return this.http.get<ProfiloMedicoDto>(`${this.apiUrl}/operatore/${id}/profilo`);
   }
 }
