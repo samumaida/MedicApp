@@ -16,8 +16,8 @@ export interface RispostaSalvaPrestazioni extends RispostaSuccesso {
   user: User;
 }
 
-// Dati del profilo medico restituiti dal backend
-export interface ProfiloMedicoDto {
+// Dati del profilo operatore restituiti dal backend
+export interface ProfiloOperatoreDto {
   id: string;
   nome: string;
   cognome: string;
@@ -81,7 +81,7 @@ export class PrestazioniApiService {
     });
   }
 
-  getProfiloMedico(id: string): Observable<ProfiloMedicoDto> {
-    return this.http.get<ProfiloMedicoDto>(`${this.apiUrl}/operatore/${id}/profilo`);
+  getProfiloOperatore(id: string): Observable<ProfiloOperatoreDto> {
+    return this.http.get<ProfiloOperatoreDto>(`${this.apiUrl}/operatore/${id}/profilo`);
   }
 }

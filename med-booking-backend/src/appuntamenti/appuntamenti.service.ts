@@ -5,6 +5,7 @@ import { Appuntamento } from './entities/appuntamento.entity';
 import { OperatorePrestazione } from '../prestazioni/entities/operatore-prestazione.entity';
 import { UserRole } from '../users/entities/user.entity';
 import { CreaAppuntamentoDto, OperatoreDisponibileDto } from './dto/appuntamenti.dto';
+import { TurnoDisponibile } from '../common/types';
 
 @Injectable()
 export class AppuntamentiService {
@@ -77,7 +78,7 @@ export class AppuntamentiService {
    * Cerco gli operatori disponibili in base alla prestazione, al giorno della settimana
    * e alla data specifica restituendo per ciascun operatore gli slot orari ancora liberi.
    */
-  async trovaOperatoriDisponibili(categoriaId: string, giornoSettimana: number, prestazioneId: string, data: string) {
+  async trovaOperatoriDisponibili(giornoSettimana: number, prestazioneId: string, data: string) {
     try {
       const associazioni = await this.operatorePrestazioneRepository.find({
         where: {
@@ -91,16 +92,16 @@ export class AppuntamentiService {
       const risultati: OperatoreDisponibileDto[] = [];
 
       for (const assoc of associazioni) {
-        const medico = assoc.operatore;
+        const operatore = assoc.operatore;
 
-        if (!medico || medico.ruolo !== UserRole.OPERATORE) continue;
+        if (!operatore || operatore.ruolo !== UserRole.OPERATORE) continue;
 
-        // Cerco il turno del medico per il giorno della settimana richiesto
-        const turnoOggi = medico.giorniDisponibili?.find(
-          (t: { giorno: number; inizio: string; fine: string }) => t.giorno === giornoSettimana
+        // Cerco il turno dell'operatore per il giorno della settimana richiesto
+        const turnoOggi = operatore.giorniDisponibili?.find(
+          (t: TurnoDisponibile) => t.giorno === giornoSettimana
         );
 
-        if (!turnoOggi) continue; // Se il medico non lavora quel giorno, passo al prossimo
+        if (!turnoOggi) continue; // Se l'operatore non lavora quel giorno, passo al prossimo
 
         // Genero tutti gli slot teorici del turno
         const tuttiGliSlot = this.generaSlot(turnoOggi.inizio, turnoOggi.fine, assoc.durataMinuti);
@@ -108,7 +109,7 @@ export class AppuntamentiService {
         // Recupero le prenotazioni esistenti dell'operatore per quella data (escluse le rifiutate)
         const prenotazioniEsistenti = await this.appuntamentoRepository.find({
           where: {
-            operatore: { id: medico.id },
+            operatore: { id: operatore.id },
             data: data,
             stato: Not('rifiutato'),
           },
@@ -119,12 +120,12 @@ export class AppuntamentiService {
         // Tengo solo gli slot ancora liberi
         const orariLiberi = tuttiGliSlot.filter(slot => !oreOccupate.includes(slot));
 
-        // Aggiungo il medico alla lista solo se ha almeno uno slot disponibile
+        // Aggiungo l'operatore alla lista solo se ha almeno uno slot disponibile
         if (orariLiberi.length > 0) {
           risultati.push({
-            id: medico.id,
-            nome: `Dott. ${medico.nome} ${medico.cognome}`,
-            specializzazione: medico.specializzazione,
+            id: operatore.id,
+            nome: `Dott. ${operatore.nome} ${operatore.cognome}`,
+            specializzazione: operatore.specializzazione,
             prezzo: assoc.prezzo,
             durataMinuti: assoc.durataMinuti,
             orari: orariLiberi,
@@ -136,7 +137,7 @@ export class AppuntamentiService {
 
     } catch (error) {
       console.error('Errore nel recupero degli operatori disponibili:', error);
-      throw new BadRequestException('Impossibile recuperare i medici disponibili per questa combinazione.');
+      throw new BadRequestException('Impossibile recuperare gli operatori disponibili per questa combinazione.');
     }
   }
 

@@ -114,13 +114,13 @@ export class PrestazioniController {
     @Param('id') id: string,
     @Body() body: { specializzazione: string; orariLavoro: TurnoDisponibile[] }
   ) {
-    return await this.prestazioniService.salvaProfiloMedico(id, body.specializzazione, body.orariLavoro);
+    return await this.prestazioniService.salvaProfiloOperatore(id, body.specializzazione, body.orariLavoro);
   }
 
   @ApiOperation({ summary: 'Restituisce specializzazione e orari di ricevimento di un operatore' })
   @Get('operatore/:id/profilo')
-  async getProfiloMedico(@Param('id') id: string) {
-    return await this.prestazioniService.trovaProfiloMedico(id);
+  async getProfiloOperatore(@Param('id') id: string) {
+    return await this.prestazioniService.trovaProfiloOperatore(id);
   }
 
   // Endpoint riservati all'admin

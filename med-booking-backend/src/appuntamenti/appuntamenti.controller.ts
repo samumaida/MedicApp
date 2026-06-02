@@ -14,20 +14,17 @@ export class AppuntamentiController {
     return await this.appuntamentiService.creaAppuntamento(body);
   }
 
-  @ApiOperation({ summary: 'Restituisce i medici disponibili per una prestazione in un dato giorno con i relativi slot orari liberi' })
-  @ApiQuery({ name: 'categoriaId', description: 'ID della categoria (es. cardiologia)' })
+  @ApiOperation({ summary: 'Restituisce gli operatori disponibili per una prestazione in un dato giorno con i relativi slot orari liberi' })
   @ApiQuery({ name: 'giorno', description: 'Giorno della settimana (1=Lunedì … 7=Domenica)' })
   @ApiQuery({ name: 'prestazioneId', description: 'UUID della prestazione selezionata' })
   @ApiQuery({ name: 'data', description: 'Data in formato YYYY-MM-DD' })
   @Get('operatori-disponibili')
   async getOperatoriDisponibili(
-    @Query('categoriaId') categoriaId: string,
     @Query('giorno') giorno: string,
     @Query('prestazioneId') prestazioneId: string,
     @Query('data') data: string
   ) {
     return await this.appuntamentiService.trovaOperatoriDisponibili(
-      categoriaId,
       parseInt(giorno),
       prestazioneId,
       data

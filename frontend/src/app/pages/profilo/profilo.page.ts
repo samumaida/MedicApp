@@ -59,7 +59,7 @@ export class ProfiloPage implements OnInit, OnDestroy, PaginaConModifiche {
    * Chiamata HTTP per recupperare i dati dell'operatore
    */
   caricaDatiProfiloDalDB(idUtente: string) {
-    this.prestazioniApiService.getProfiloMedico(idUtente).subscribe({
+    this.prestazioniApiService.getProfiloOperatore(idUtente).subscribe({
       next: (datiDB) => {
         if (this.utente) {
           this.utente.specializzazione = datiDB.specializzazione;
@@ -102,7 +102,7 @@ export class ProfiloPage implements OnInit, OnDestroy, PaginaConModifiche {
   /**
    * Salvo le modifiche degli orari su Postgres
    */
-  salvaImpostazioniMedico() {
+  salvaImpostazioniOperatore() {
     if (!this.utente || !this.utente.id) return;
 
     const turniFinali = this.giorniSettimana

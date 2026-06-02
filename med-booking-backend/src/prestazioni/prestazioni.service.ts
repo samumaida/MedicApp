@@ -105,7 +105,7 @@ export class PrestazioniService implements OnModuleInit {
         });
     }
 
-  async salvaProfiloMedico(id: string, specializzazione: string, orariLavoro: TurnoDisponibile[]) {
+  async salvaProfiloOperatore(id: string, specializzazione: string, orariLavoro: TurnoDisponibile[]) {
     try {
       await this.prestazioneRepository.manager.update(
         'User', 
@@ -122,7 +122,7 @@ export class PrestazioniService implements OnModuleInit {
     }
   }
 
-  async trovaProfiloMedico(id: string) {
+  async trovaProfiloOperatore(id: string) {
     try {
       const utente = await this.prestazioneRepository.manager.findOne(User, {
         where: { id: id } as any

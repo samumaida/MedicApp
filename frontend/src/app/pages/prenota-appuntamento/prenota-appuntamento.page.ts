@@ -131,7 +131,6 @@ export class PrenotaAppuntamentoPage implements OnInit {
 
     // Applico il filtro corretto, passando anche la data per escludere gli slot già occupati
     this.appuntamentiApiService.getOperatoriDisponibili(
-      this.categoriaSelezionataId,
       giornoSettimana,
       String(this.prestazioneScelta.id),
       this.dataSelezionata
