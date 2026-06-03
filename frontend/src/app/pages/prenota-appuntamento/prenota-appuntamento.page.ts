@@ -181,30 +181,38 @@ export class PrenotaAppuntamentoPage implements OnInit {
       note: ''
     };
 
-    this.appuntamentiApiService.inviaPrenotazione(payload).subscribe({
-      next: async (res) => {
-        if (res.success) {
+    try {
+      this.appuntamentiApiService.inviaPrenotazione(payload).subscribe({
+        next: async (res) => {
+          if (res.success) {
+            const toast = await this.toastCtrl.create({
+              message: `Appuntamento richiesto con successo. In attesa di approvazione dal medico.`,
+              duration: 3500,
+              color: 'success',
+              position: 'bottom'
+            });
+            await toast.present();
+
+            this.router.navigate(['/home']);
+          }
+        },
+        error: async (err) => {
+          console.error('Errore durante la prenotazione:', err);
           const toast = await this.toastCtrl.create({
-            message: `Appuntamento richiesto con successo. In attesa di approvazione dal medico.`,
-            duration: 3500,
-            color: 'success',
+            message: 'Impossibile completare la prenotazione. Riprova più tardi.',
+            duration: 3000,
+            color: 'danger',
             position: 'bottom'
           });
           await toast.present();
-
-          this.router.navigate(['/home']);
         }
-      },
-      error: async (err) => {
-        console.error('Errore durante la prenotazione:', err);
-        const toast = await this.toastCtrl.create({
-          message: 'Impossibile completare la prenotazione. Riprova più tardi.',
-          duration: 3000,
-          color: 'danger',
-          position: 'bottom'
-        });
-        await toast.present();
-      }
-    });
+      });
+    } finally {
+      this.step = 1;
+      this.prestazioneScelta = null;
+      this.dataSelezionata = '';
+      this.categoriaSelezionataId = '';
+      this.operatoriFiltrati = [];
+    }
   }
 }

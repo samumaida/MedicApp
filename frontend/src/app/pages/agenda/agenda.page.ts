@@ -179,7 +179,11 @@ export class AgendaPage implements OnInit {
       stato: props.stato || 'in attesa',
       data: props.data || evento.start?.toISOString().split('T')[0],
       ora: props.ora || `${evento.start?.getHours().toString().padStart(2, '0')}:${evento.start?.getMinutes().toString().padStart(2, '0')}`,
-      prestazione: { nome: evento.title?.split(' - ')[0] },
+      prestazione: { 
+        nome: evento.title?.split(' - ')[0], 
+        durataMinuti: evento.end && evento.start // Calcolo la differenza in minuti tra start e end per avere la durata dell'appuntamento
+          ? Math.round((evento.end.getTime() - evento.start.getTime()) / 60000)
+          : 60 },
       cliente: { nome: props.clienteNome || '', cognome: '' },
       operatore: { nome: props.operatoreNome || '', cognome: '' }
     };

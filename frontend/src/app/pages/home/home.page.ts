@@ -222,4 +222,13 @@ export class HomePage implements OnInit, OnDestroy {
   navigaA(path: string) {
     this.router.navigate([path]);
   }
+
+  // Calcola l'orario di fine appuntamento dato un orario di inizio e una durata in minuti
+  calcolaOreFine(ora: string, durataMinuti: number = 60): string {
+    const [h, m] = ora.split(':').map(Number);
+    const totalMinuti = h * 60 + m + durataMinuti;
+    const oreFine = Math.floor(totalMinuti / 60).toString().padStart(2, '0');
+    const minFine = (totalMinuti % 60).toString().padStart(2, '0');
+    return `${oreFine}:${minFine}`;
+  }
 }

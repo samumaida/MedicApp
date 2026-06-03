@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { addIcons } from 'ionicons';
-import { cloudUploadOutline, checkmarkOutline, eyeOutline, downloadOutline } from 'ionicons/icons';
+import { cloudUploadOutline, checkmarkOutline, eyeOutline, downloadOutline, closeOutline, medicalOutline, timeOutline, flaskOutline } from 'ionicons/icons';
 import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 import { AppuntamentoConRelazioni } from '../../models/reservations.model';
@@ -69,7 +69,7 @@ import { AppuntamentiApiService } from '../../services/appuntamenti-api.service'
           <ion-icon name="time-outline" slot="start" color="primary"></ion-icon>
           <ion-label>
             <p>Orario</p>
-            <h3>{{ appuntamento.ora }}</h3>
+            <h3>{{ appuntamento.ora }} - {{ calcolaOreFine(appuntamento.ora, appuntamento.prestazione?.durataMinuti) }}</h3>
           </ion-label>
         </ion-item>
 
@@ -167,7 +167,7 @@ export class AppuntamentoDetailComponent {
     private toastCtrl: ToastController,
     private appuntamentiApiService: AppuntamentiApiService
   ) {
-    addIcons({ cloudUploadOutline, checkmarkOutline, eyeOutline, downloadOutline });
+    addIcons({ cloudUploadOutline, checkmarkOutline, eyeOutline, downloadOutline, closeOutline, medicalOutline, timeOutline, flaskOutline });
   }
 
   get coloreStato(): string {
@@ -226,6 +226,15 @@ export class AppuntamentoDetailComponent {
   }
 
   private readonly backendUrl = 'http://localhost:3000';
+
+  // Calcola l'orario di fine appuntamento dato un orario di inizio e una durata in minuti
+  calcolaOreFine(ora: string, durataMinuti: number = 60): string {
+    const [h, m] = ora.split(':').map(Number);
+    const totalMinuti = h * 60 + m + durataMinuti;
+    const oreFine = Math.floor(totalMinuti / 60).toString().padStart(2, '0');
+    const minFine = (totalMinuti % 60).toString().padStart(2, '0');
+    return `${oreFine}:${minFine}`;
+  }
 
   visualizzaReferto() {
     if (this.appuntamento.refertoUrl) {

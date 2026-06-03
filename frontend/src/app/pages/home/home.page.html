@@ -40,7 +40,7 @@
               </ion-icon>
               <ion-label>
                 <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
-                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
+                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }} - {{ calcolaOreFine(app.ora, app.prestazione?.durataMinuti) }}</p>
               </ion-label>
               <ion-badge slot="end" color="warning">in attesa</ion-badge>
             </ion-item>
@@ -66,7 +66,7 @@
             <ion-item button *ngFor="let app of confermati" (click)="apriDettaglio(app)">
               <ion-label>
                 <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
-                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
+                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }} - {{ calcolaOreFine(app.ora, app.prestazione?.durataMinuti) }}</p>
               </ion-label>
               <ion-badge slot="end" color="success">confermato</ion-badge>
             </ion-item>
@@ -92,7 +92,7 @@
             <ion-item button *ngFor="let app of completati" (click)="apriDettaglio(app)">
               <ion-label>
                 <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
-                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
+                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }} - {{ calcolaOreFine(app.ora, app.prestazione?.durataMinuti) }}</p>
               </ion-label>
               <ion-icon
                 *ngIf="app.refertoUrl"
@@ -126,7 +126,7 @@
             <ion-item button *ngFor="let app of rifiutati" (click)="apriDettaglio(app)">
               <ion-label>
                 <h3>Paziente: {{ app.cliente?.nome }} {{ app.cliente?.cognome }}</h3>
-                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
+                <p>{{ app.prestazione?.nome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }} - {{ calcolaOreFine(app.ora, app.prestazione?.durataMinuti) }}</p>
               </ion-label>
               <ion-badge slot="end" color="danger">rifiutato</ion-badge>
             </ion-item>
@@ -154,7 +154,7 @@
       <ion-item button *ngFor="let app of listaAppuntamenti" (click)="apriDettaglio(app)">
         <ion-label>
           <h3>{{ app.prestazione?.nome }}</h3>
-          <p>Dott. {{ app.operatore?.nome }} {{ app.operatore?.cognome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }}</p>
+          <p>Dott. {{ app.operatore?.nome }} {{ app.operatore?.cognome }} — {{ app.data | date:'dd/MM/yyyy' }} ore {{ app.ora }} - {{ calcolaOreFine(app.ora, app.prestazione?.durataMinuti) }}</p>
         </ion-label>
         <ion-icon
           *ngIf="app.refertoUrl"
@@ -180,7 +180,7 @@
     </ion-item>
     <ion-card *ngFor="let app of appuntamentiConReferto">
       <ion-card-header>
-        <ion-card-title>{{ app.prestazione?.nome }} — ore {{ app.ora }}</ion-card-title>
+        <ion-card-title>{{ app.prestazione?.nome }} — ore {{ app.ora }} - {{ calcolaOreFine(app.ora, app.prestazione?.durataMinuti) }}</ion-card-title>
         <ion-card-subtitle>{{ app.data | date:'dd/MM/yyyy' }}</ion-card-subtitle>
       </ion-card-header>
       <ion-card-content>
