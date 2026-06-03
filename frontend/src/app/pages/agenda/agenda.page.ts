@@ -115,9 +115,13 @@ export class AgendaPage implements OnInit {
         const eventiFormattati = appuntamentiRaw.map(app => {
           const dataInizio = `${app.data}T${app.ora}:00`;
 
-          const oreMinuti = app.ora.split(':');
-          const oraFineCorretta = (parseInt(oreMinuti[0]) + 1).toString().padStart(2, '0');
-          const dataFine = `${app.data}T${oraFineCorretta}:${oreMinuti[1]}:00`;
+          // Calcolo la fine sommando la durata della prestazione
+          const durataMinuti = app.prestazione?.durataMinuti ?? 60;
+          const [oreInizio, minInizio] = app.ora.split(':').map(Number);
+          const totalMinutiFine = oreInizio * 60 + minInizio + durataMinuti;
+          const oreFine = Math.floor(totalMinutiFine / 60).toString().padStart(2, '0');
+          const minFine = (totalMinutiFine % 60).toString().padStart(2, '0');
+          const dataFine = `${app.data}T${oreFine}:${minFine}:00`;
 
           // Se sono l'operatore voglio vedere il cliente, se sono il cliente voglio vedere l'operatore
           const titoloMostrato = this.currentUser?.ruolo === 'operatore'

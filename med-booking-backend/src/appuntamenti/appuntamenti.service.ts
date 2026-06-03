@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { Appuntamento } from './entities/appuntamento.entity';
 import { OperatorePrestazione } from '../prestazioni/entities/operatore-prestazione.entity';
+import { Prestazione } from '../prestazioni/entities/prestazione.entity';
 import { UserRole } from '../users/entities/user.entity';
 import { CreaAppuntamentoDto, OperatoreDisponibileDto } from './dto/appuntamenti.dto';
 import { TurnoDisponibile } from '../common/types';
@@ -14,25 +15,47 @@ export class AppuntamentiService {
     private readonly appuntamentoRepository: Repository<Appuntamento>,
     @InjectRepository(OperatorePrestazione)
     private readonly operatorePrestazioneRepository: Repository<OperatorePrestazione>,
+    @InjectRepository(Prestazione)
+    private readonly prestazioneRepository: Repository<Prestazione>,
   ) {}
 
+  // Converte l'orario in minuti totali dall'inizio della giornata
+  private timeToMinutes(time: string): number {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+  }
+
+  // Verifica se i due intervalli (start1, start1+dur1 e start2, start2+dur2) si sovrappongono
+  private siSovrappongono(start1: number, dur1: number, start2: number, dur2: number): boolean {
+    return start1 < start2 + dur2 && start2 < start1 + dur1;
+  }
+
   async creaAppuntamento(dati: CreaAppuntamentoDto) {
-    /** 
-     * Controllo che l'operatore non abbia già un appuntamento
-     * attivo nello stesso giorno e alla stessa ora
-     */ 
-    const sovrapposizione = await this.appuntamentoRepository.findOne({
+    // Recupero la durata della prestazione richiesta
+    const prestazione = await this.prestazioneRepository.findOne({ where: { id: dati.prestazioneId } });
+    const nuovaDurata = prestazione?.durataMinuti ?? 60;
+    const nuovoInizio = this.timeToMinutes(dati.ora);
+
+    // Carico tutti gli appuntamenti attivi dell'operatore per quel giorno con le loro prestazioni
+    const appuntamentiEsistenti = await this.appuntamentoRepository.find({
       where: {
         operatore: { id: dati.operatoreId },
         data: dati.data,
-        ora: dati.ora,
         stato: Not('rifiutato'),
       },
+      relations: { prestazione: true }
+    });
+
+    // Controllo la sovrapposizione con altri appuntamenti tenendo conto della durata di ciascun appuntamento
+    const sovrapposizione = appuntamentiEsistenti.find(app => {
+      const esistenteInizio = this.timeToMinutes(app.ora);
+      const esistenteDurata = app.prestazione?.durataMinuti ?? 60;
+      return this.siSovrappongono(nuovoInizio, nuovaDurata, esistenteInizio, esistenteDurata);
     });
 
     if (sovrapposizione) {
       throw new ConflictException(
-        'Questo orario è già stato prenotato da un altro paziente. Scegli un orario diverso.'
+        'Questo orario si sovrappone a un appuntamento già esistente. Scegli un orario diverso.'
       );
     }
 
@@ -106,19 +129,25 @@ export class AppuntamentiService {
         // Genero tutti gli slot teorici del turno
         const tuttiGliSlot = this.generaSlot(turnoOggi.inizio, turnoOggi.fine, assoc.durataMinuti);
 
-        // Recupero le prenotazioni esistenti dell'operatore per quella data (escluse le rifiutate)
+        // Recupero le prenotazioni esistenti dell'operatore per quella data con le loro prestazioni
         const prenotazioniEsistenti = await this.appuntamentoRepository.find({
           where: {
             operatore: { id: operatore.id },
             data: data,
             stato: Not('rifiutato'),
           },
+          relations: { prestazione: true }
         });
 
-        const oreOccupate = prenotazioniEsistenti.map(p => p.ora);
-
-        // Tengo solo gli slot ancora liberi
-        const orariLiberi = tuttiGliSlot.filter(slot => !oreOccupate.includes(slot));
+        // Filtro gli slot liberi controllando la sovrapposizione con la durata di ogni appuntamento
+        const orariLiberi = tuttiGliSlot.filter(slot => {
+          const slotInizio = this.timeToMinutes(slot);
+          return !prenotazioniEsistenti.some(app => {
+            const appInizio = this.timeToMinutes(app.ora);
+            const appDurata = app.prestazione?.durataMinuti ?? 60;
+            return this.siSovrappongono(slotInizio, assoc.durataMinuti, appInizio, appDurata);
+          });
+        });
 
         // Aggiungo l'operatore alla lista solo se ha almeno uno slot disponibile
         if (orariLiberi.length > 0) {
