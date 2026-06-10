@@ -7,6 +7,7 @@ import {
   RispostaSuccesso,
   RispostaCreaAppuntamento
 } from '../models/reservations.model';
+import { environment } from '../../environments/environment';
 
 export interface InviaAppuntamentoDto {
   data: string;
@@ -21,7 +22,7 @@ export interface InviaAppuntamentoDto {
   providedIn: 'root'
 })
 export class AppuntamentiApiService {
-  private apiUrl = 'http://localhost:3000/appuntamenti';
+  private apiUrl = `${environment.apiUrl}/appuntamenti`;
 
   constructor(private http: HttpClient) {}
 

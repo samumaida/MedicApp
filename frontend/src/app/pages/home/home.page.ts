@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
+import { environment } from '../../../environments/environment';
 import { logOutOutline, calendar, documentTextOutline, addCircleOutline, downloadOutline, eyeOutline, alertCircleOutline, checkmarkCircleOutline, closeCircleOutline, trashOutline, personOutline, medicalOutline, flaskOutline, calendarOutline, timeOutline, closeOutline } from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { User } from '../../models/user.model';
@@ -201,7 +202,7 @@ export class HomePage implements OnInit, OnDestroy {
     }
   }
 
-  private readonly backendUrl = 'http://localhost:3000';
+  private readonly backendUrl = environment.apiUrl;
 
   // Restituisce solo gli appuntamenti che hanno un referto caricato
   get appuntamentiConReferto(): AppuntamentoConRelazioni[] {

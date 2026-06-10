@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule, ModalController, ToastController } from '@ionic/angular';
 import { AppuntamentoConRelazioni } from '../../models/reservations.model';
 import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-appuntamento-detail',
@@ -225,7 +226,7 @@ export class AppuntamentoDetailComponent {
     });
   }
 
-  private readonly backendUrl = 'http://localhost:3000';
+  private readonly backendUrl = environment.apiUrl;
 
   // Calcola l'orario di fine appuntamento dato un orario di inizio e una durata in minuti
   calcolaOreFine(ora: string, durataMinuti: number = 60): string {

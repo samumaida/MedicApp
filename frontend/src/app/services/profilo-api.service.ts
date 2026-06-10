@@ -4,12 +4,13 @@ import { Observable } from 'rxjs';
 import { TurnoDisponibile } from '../models/user.model';
 import { RispostaSuccesso } from '../models/reservations.model';
 import { ProfiloOperatoreDto } from './prestazioni-api.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProfiloApiService {
-  private apiUrl = 'http://localhost:3000/prestazioni';
+  private apiUrl = `${environment.apiUrl}/prestazioni`;
 
   constructor(private http: HttpClient) {}
 

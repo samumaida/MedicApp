@@ -27,5 +27,9 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "exclude": [
+    "capacitor.config.ts",
+    "node_modules"
+  ]
 }

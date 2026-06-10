@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Prestazione, CategoriaMinima, RispostaSuccesso } from '../models/reservations.model';
 import { User, TurnoDisponibile } from '../models/user.model';
+import { environment } from '../../environments/environment';
 
 // Riga inviata al backend per abilitare una prestazione con i valori personalizzati dell'operatore
 export interface PrestazioneOperatoreDto {
@@ -31,7 +32,7 @@ export interface ProfiloOperatoreDto {
   providedIn: 'root'
 })
 export class PrestazioniApiService {
-  private apiUrl = 'http://localhost:3000/prestazioni';
+  private apiUrl = `${environment.apiUrl}/prestazioni`;
 
   constructor(private http: HttpClient) {}
 
