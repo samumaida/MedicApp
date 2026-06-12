@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { addIcons } from 'ionicons';
 import { cloudUploadOutline, checkmarkOutline, eyeOutline, downloadOutline, closeOutline, medicalOutline, timeOutline, flaskOutline } from 'ionicons/icons';
 import { CommonModule } from '@angular/common';
-import { ModalController, ToastController } from '@ionic/angular';
+import { ModalController, ToastController } from '@ionic/angular/standalone';
 import { AppuntamentoConRelazioni } from '../../models/reservations.model';
 import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
 import { environment } from '../../../environments/environment';

@@ -1,6 +1,6 @@
 import { CanDeactivateFn } from '@angular/router';
 import { inject } from '@angular/core';
-import { AlertController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular/standalone';
 
 // Interfaccia per controllare se una pagina ha modifiche non salvate
 export interface PaginaConModifiche {
