@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { medicalOutline, chevronForwardOutline, arrowBackOutline } from 'ionicons/icons';
@@ -10,13 +10,64 @@ import { PrestazioniApiService } from '../../services/prestazioni-api.service';
 import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
 import { AuthService } from '../../services/auth';
 import { firstValueFrom } from 'rxjs';
+import { 
+  IonAccordion, 
+  IonAccordionGroup, 
+  IonAvatar, 
+  IonBackButton, 
+  IonButton, 
+  IonButtons, 
+  IonCard, 
+  IonCardContent, 
+  IonCardHeader, 
+  IonCardSubtitle, 
+  IonCardTitle, 
+  IonCol, 
+  IonContent, 
+  IonDatetime, 
+  IonGrid, 
+  IonHeader, 
+  IonIcon, 
+  IonItem, 
+  IonLabel, 
+  IonRow, 
+  IonSearchbar, 
+  IonTitle, 
+  IonToolbar 
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-prenota-appuntamento',
   templateUrl: './prenota-appuntamento.page.html',
   styleUrls: ['./prenota-appuntamento.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonAccordion, 
+    IonAccordionGroup, 
+    IonAvatar, 
+    IonBackButton, 
+    IonButton, 
+    IonButtons, 
+    IonCard, 
+    IonCardContent, 
+    IonCardHeader, 
+    IonCardSubtitle, 
+    IonCardTitle, 
+    IonCol, 
+    IonContent, 
+    IonDatetime, 
+    IonGrid, 
+    IonHeader, 
+    IonIcon, 
+    IonItem, 
+    IonLabel, 
+    IonRow, 
+    IonSearchbar, 
+    IonTitle, 
+    IonToolbar, 
+    CommonModule, 
+    FormsModule
+  ]
 })
 export class PrenotaAppuntamentoPage implements OnInit {
   step: number = 1;

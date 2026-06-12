@@ -1,19 +1,50 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { RegisterData } from '../../models/user.model';
 import { addIcons } from 'ionicons';
 import { eyeOutline, eyeOffOutline } from 'ionicons/icons';
+import { 
+  IonButton, 
+  IonContent, 
+  IonHeader, 
+  IonIcon, 
+  IonInput, 
+  IonItem, 
+  IonLabel, 
+  IonList, 
+  IonSegment, 
+  IonSegmentButton, 
+  IonSelect, 
+  IonSelectOption, 
+  IonTitle 
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonButton, 
+    IonContent, 
+    IonHeader, 
+    IonIcon, 
+    IonInput, 
+    IonItem, 
+    IonLabel, 
+    IonList, 
+    IonSegment, 
+    IonSegmentButton, 
+    IonSelect, 
+    IonSelectOption, 
+    IonTitle, 
+    CommonModule, 
+    FormsModule
+  ]
 })
 export class LoginPage implements OnInit {
   // Controlla quale vista mostrare tra 'login' o 'register'
@@ -67,7 +98,7 @@ export class LoginPage implements OnInit {
         this.router.navigate(['/home']);
       },
       error: (err) => {
-        console.error('Errore login:', err);
+        console.error('Errore login:', JSON.stringify(err));
         const msg = err.error?.message || 'Errore di connessione al server';
         this.presentToast(msg, 'danger');
       }

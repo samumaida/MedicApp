@@ -1,7 +1,7 @@
 import { Component, OnInit, HostListener, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ModalController, ToastController } from '@ionic/angular';
+import { ModalController, ToastController } from '@ionic/angular';
 import { AppuntamentoDetailComponent } from '../../components/appuntamento-detail/appuntamento-detail.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { FullCalendarComponent } from '@fullcalendar/angular';
@@ -11,6 +11,7 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { User } from '../../models/user.model';
 import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
 import { AuthService } from '../../services/auth';
+import { IonBackButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-agenda',
@@ -18,7 +19,7 @@ import { AuthService } from '../../services/auth';
   styleUrls: ['./agenda.page.scss'],
   standalone: true,
   imports: [
-    IonicModule,
+    IonBackButton, IonButtons, IonContent, IonHeader, IonTitle, IonToolbar,
     CommonModule,
     FormsModule,
     FullCalendarModule,

@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from './services/auth';
 import { addIcons } from 'ionicons';
@@ -7,13 +6,44 @@ import { appsOutline, calendarOutline, logOutOutline, addCircleOutline, personOu
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { User } from './models/user.model';
+import { 
+  IonApp, 
+  IonContent, 
+  IonHeader, 
+  IonIcon, 
+  IonItem, 
+  IonItemDivider, 
+  IonLabel, 
+  IonList, 
+  IonMenu, 
+  IonMenuToggle, 
+  IonRouterOutlet, 
+  IonTitle, 
+  IonToolbar 
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   standalone: true,
-  imports: [IonicModule, RouterModule, CommonModule],
+  imports: [
+    IonApp, 
+    IonContent, 
+    IonHeader, 
+    IonIcon, 
+    IonItem, 
+    IonItemDivider, 
+    IonLabel, 
+    IonList, 
+    IonMenu, 
+    IonMenuToggle, 
+    IonRouterOutlet, 
+    IonTitle, 
+    IonToolbar, 
+    RouterModule, 
+    CommonModule
+  ],
 })
 export class AppComponent implements OnInit, OnDestroy {
   user: User | null = null;

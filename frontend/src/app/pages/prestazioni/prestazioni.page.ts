@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController, AlertController } from '@ionic/angular';
+import { ToastController, AlertController } from '@ionic/angular';
 import { Subscription, take } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { User, OperatorePrestazione } from '../../models/user.model';
@@ -10,13 +10,62 @@ import { PrestazioniApiService } from '../../services/prestazioni-api.service';
 import { PaginaConModifiche } from '../../guards/unsaved-changes.guard';
 import { addIcons } from 'ionicons';
 import { pencilOutline, trashOutline, addOutline, folderOutline, chevronForwardOutline, saveOutline } from 'ionicons/icons';
+import { 
+  IonBackButton, 
+  IonButton, 
+  IonButtons, 
+  IonCard, 
+  IonCardContent, 
+  IonCardHeader, 
+  IonCardSubtitle, 
+  IonCardTitle, 
+  IonContent, 
+  IonFooter, 
+  IonHeader, 
+  IonIcon, 
+  IonInput, 
+  IonItem, 
+  IonLabel, 
+  IonList, 
+  IonModal, 
+  IonSearchbar, 
+  IonSpinner, 
+  IonTitle, 
+  IonToggle, 
+  IonToolbar
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-prestazioni',
   templateUrl: './prestazioni.page.html',
   styleUrls: ['./prestazioni.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonBackButton, 
+    IonButton, 
+    IonButtons, 
+    IonCard, 
+    IonCardContent, 
+    IonCardHeader, 
+    IonCardSubtitle, 
+    IonCardTitle, 
+    IonContent, 
+    IonFooter, 
+    IonHeader, 
+    IonIcon, 
+    IonInput, 
+    IonItem, 
+    IonLabel, 
+    IonList, 
+    IonModal, 
+    IonSearchbar, 
+    IonSpinner, 
+    IonTitle, 
+    IonToggle, 
+    IonToolbar, 
+    CommonModule, 
+    FormsModule
+  ]
 })
 export class PrestazioniPage implements OnInit, OnDestroy, PaginaConModifiche {
   operatoreLoggato: User | null = null;

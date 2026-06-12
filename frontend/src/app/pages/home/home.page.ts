@@ -1,8 +1,25 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { IonicModule, ModalController, ToastController } from '@ionic/angular';
+import { ModalController, ToastController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { environment } from '../../../environments/environment';
-import { logOutOutline, calendar, documentTextOutline, addCircleOutline, downloadOutline, eyeOutline, alertCircleOutline, checkmarkCircleOutline, closeCircleOutline, trashOutline, personOutline, medicalOutline, flaskOutline, calendarOutline, timeOutline, closeOutline } from 'ionicons/icons';
+import { 
+  logOutOutline, 
+  calendar, 
+  documentTextOutline, 
+  addCircleOutline, 
+  downloadOutline, 
+  eyeOutline, 
+  alertCircleOutline, 
+  checkmarkCircleOutline, 
+  closeCircleOutline, 
+  trashOutline, 
+  personOutline, 
+  medicalOutline, 
+  flaskOutline, 
+  calendarOutline, 
+  timeOutline, 
+  closeOutline
+} from 'ionicons/icons';
 import { Router } from '@angular/router';
 import { User } from '../../models/user.model';
 import { AppuntamentoConRelazioni } from '../../models/reservations.model';
@@ -11,13 +28,64 @@ import { AuthService } from '../../services/auth';
 import { AppuntamentiApiService } from '../../services/appuntamenti-api.service';
 import { AppuntamentoDetailComponent } from '../../components/appuntamento-detail/appuntamento-detail.component';
 import { Subscription } from 'rxjs';
+import { 
+  IonAccordion, 
+  IonAccordionGroup, 
+  IonBadge, 
+  IonButton, 
+  IonButtons, 
+  IonCard, 
+  IonCardContent, 
+  IonCardHeader, 
+  IonCardSubtitle, 
+  IonCardTitle, 
+  IonContent, 
+  IonFooter, 
+  IonHeader, 
+  IonIcon, 
+  IonItem, 
+  IonLabel, 
+  IonList, 
+  IonMenuButton, 
+  IonTabBar, 
+  IonTabButton, 
+  IonTabs, 
+  IonTitle, 
+  IonToolbar 
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, AppuntamentoDetailComponent],
+  imports: [
+    IonAccordion, 
+    IonAccordionGroup, 
+    IonBadge, 
+    IonButton, 
+    IonButtons, 
+    IonCard, 
+    IonCardContent, 
+    IonCardHeader, 
+    IonCardSubtitle, 
+    IonCardTitle, 
+    IonContent, 
+    IonFooter, 
+    IonHeader, 
+    IonIcon, 
+    IonItem, 
+    IonLabel, 
+    IonList, 
+    IonMenuButton, 
+    IonTabBar, 
+    IonTabButton, 
+    IonTabs, 
+    IonTitle, 
+    IonToolbar, 
+    CommonModule, 
+    AppuntamentoDetailComponent
+  ],
 })
 export class HomePage implements OnInit, OnDestroy {
   user: User | null = null;

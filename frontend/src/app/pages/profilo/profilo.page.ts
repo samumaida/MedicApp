@@ -1,19 +1,58 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 import { ProfiloApiService } from '../../services/profilo-api.service';
 import { AuthService } from '../../services/auth';
 import { PaginaConModifiche } from '../../guards/unsaved-changes.guard';
 import { Subscription } from 'rxjs';
 import { User, TurnoDisponibile } from '../../models/user.model';
+import { 
+  IonBackButton, 
+  IonButton, 
+  IonButtons, 
+  IonCard, 
+  IonCardContent, 
+  IonCardHeader, 
+  IonCardSubtitle, 
+  IonCardTitle, 
+  IonCheckbox, 
+  IonContent, 
+  IonHeader, 
+  IonIcon, 
+  IonInput, 
+  IonItem, 
+  IonList, 
+  IonTitle, 
+  IonToolbar 
+} from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-profilo',
   templateUrl: './profilo.page.html',
   styleUrls: ['./profilo.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [
+    IonBackButton, 
+    IonButton, 
+    IonButtons, 
+    IonCard, 
+    IonCardContent, 
+    IonCardHeader, 
+    IonCardSubtitle, 
+    IonCardTitle, 
+    IonCheckbox, 
+    IonContent, 
+    IonHeader, 
+    IonIcon, 
+    IonInput, 
+    IonItem, 
+    IonList, 
+    IonTitle, 
+    IonToolbar, 
+    CommonModule, 
+    FormsModule
+  ]
 })
 export class ProfiloPage implements OnInit, OnDestroy, PaginaConModifiche {
 
