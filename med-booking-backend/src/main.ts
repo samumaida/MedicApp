@@ -33,8 +33,8 @@ async function bootstrap() {
 
       const isAllowed =
         corsOriginEnv === 'localhost'
-          // Sviluppo: qualsiasi porta localhost + schema capacitor
-          ? origin.startsWith('http://localhost') || origin.startsWith('capacitor://localhost')
+          // Sviluppo: qualsiasi porta localhost + schemi Capacitor (Android usa https://localhost)
+          ? origin.startsWith('http://localhost') || origin.startsWith('https://localhost') || origin.startsWith('capacitor://localhost')
           // Produzione: solo l'URL esatto definito in .env
           : origin === corsOriginEnv;
 
