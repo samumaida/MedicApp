@@ -31,7 +31,25 @@
         </ion-item>
 
         <ion-item>
-          <ion-input label="Password" labelPosition="floating" type="password" placeholder="********" [(ngModel)]="loginData.password"></ion-input>
+          <ion-input
+            label="Password"
+            labelPosition="floating"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="********"
+            [(ngModel)]="loginData.password">
+            <ion-button
+              *ngIf="loginData.password.length > 0"
+              fill="clear"
+              slot="end"
+              (click)="togglePassword()"
+              type="button"
+              aria-label="Mostra o nascondi password">
+              <ion-icon
+                slot="icon-only"
+                [name]="showPassword ? 'eye-off-outline' : 'eye-outline'">
+              </ion-icon>
+            </ion-button>
+          </ion-input>
         </ion-item>
       </ion-list>
 
