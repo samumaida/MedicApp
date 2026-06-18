@@ -27,6 +27,7 @@ const dbName = process.env['DB_NAME'] || 'medicapp_db';
       database: dbName,
       autoLoadEntities: true,
       synchronize: true,
+      ssl: process.env['DB_SSL'] === 'true' ? { rejectUnauthorized: false } : false,
     }),
     AuthModule,
     PrestazioniModule,
