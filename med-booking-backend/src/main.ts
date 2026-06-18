@@ -17,26 +17,35 @@ async function bootstrap() {
 
   // CORS configurato tramite variabile d'ambiente CORS_ORIGIN (vedi .env).
   //
-  // Sviluppo:   CORS_ORIGIN=localhost  → accetta qualsiasi porta localhost
-  //             (ionic serve può usare 8100, 8101, ecc. a seconda della porta libera)
-  // Produzione: CORS_ORIGIN=https://app.medicapp.codesea.it → solo l'URL reale
+  // Supporta una lista di origini separate da virgola, per permettere
+  // contemporaneamente l'app mobile (Capacitor) e il sito web di produzione.
+  //
+  // Esempi:
+  //   Sviluppo:   CORS_ORIGIN=localhost
+  //               → accetta qualsiasi porta/scheda localhost (ionic serve, browser, Capacitor)
+  //   Produzione: CORS_ORIGIN=localhost,https://medicapp-frontend.onrender.com
+  //               → accetta sia l'app mobile (origine https://localhost) sia il sito web
   //
   // Nota sicurezza: consentire localhost non espone l'API a rischi esterni —
   // il CORS è una protezione del browser e nessun sito remoto può avere
-  // origine "localhost". In produzione però lo blocchiamo comunque per pulizia.
-  const corsOriginEnv = process.env['CORS_ORIGIN'] || 'localhost';
+  // origine "localhost".
+  const corsOriginList = (process.env['CORS_ORIGIN'] || 'localhost')
+    .split(',')
+    .map((o) => o.trim())
+    .filter((o) => o.length > 0);
 
   app.enableCors({
     origin: (origin, callback) => {
       // Permetti richieste senza origin (Postman, app Capacitor installata)
       if (!origin) return callback(null, true);
 
-      const isAllowed =
-        corsOriginEnv === 'localhost'
-          // Sviluppo: qualsiasi porta localhost + schemi Capacitor (Android usa https://localhost)
+      const isAllowed = corsOriginList.some((allowed) =>
+        allowed === 'localhost'
+          // Qualsiasi porta localhost + schemi Capacitor (Android usa https://localhost)
           ? origin.startsWith('http://localhost') || origin.startsWith('https://localhost') || origin.startsWith('capacitor://localhost')
-          // Produzione: solo l'URL esatto definito in .env
-          : origin === corsOriginEnv;
+          // Match esatto con uno degli URL espliciti definiti in .env
+          : origin === allowed,
+      );
 
       if (isAllowed) {
         callback(null, true);

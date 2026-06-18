@@ -1,6 +1,6 @@
 // ⚠ File generato automaticamente da build-client.js — NON modificare manualmente
 export const environment = {
   production: true,
-  apiUrl: 'https://api.medicapp.codesea.it',
+  apiUrl: 'https://medicapp-nzy0.onrender.com',
   appName: 'MedicApp'
 };

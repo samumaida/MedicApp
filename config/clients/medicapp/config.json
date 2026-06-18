@@ -5,7 +5,7 @@
 
   "api": {
     "devUrl": "http://localhost:3000",
-    "prodUrl": "https://api.medicapp.codesea.it"
+    "prodUrl": "https://medicapp-nzy0.onrender.com"
   },
 
   "theme": {
