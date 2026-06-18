@@ -107,7 +107,7 @@ export class PrenotaAppuntamentoPage implements OnInit {
         this.caricaPrestazioniDalDb();
       },
       error: (err) => {
-        console.error('Errore durante il recupero delle categorie:', err);
+        console.error('Errore durante il recupero delle categorie:', JSON.stringify(err));
       }
     });
   }

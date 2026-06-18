@@ -39,33 +39,97 @@ MedicApp/
 
 ## Avvio in sviluppo
 
-### Backend
+### 1. Avvia il database PostgreSQL
 
 ```bash
+docker-compose up -d
+```
+
+<!-- > Se il backend si ferma con `ECONNREFUSED 127.0.0.1:5432`, PostgreSQL si è spento. Riavvialo con questo comando prima di tutto il resto. -->
+
+### 2. Avvia il backend NestJS
+
+```bash
+# Controlla di essere nella folder del backend in alternativa entraci con il seguente comando
 cd med-booking-backend
 
-# Prima volta: copia il file .env e compila i valori
-cp .env.example .env
+# # Solo la prima volta: copia il template .env
+# cp .env.example .env   # poi compila DB_PASSWORD e JWT_SECRET
 
-# Avvia il database PostgreSQL
-docker-compose up -d
-
-# Avvia il server NestJS
 npm run start:dev
 ```
 
-### Frontend
+Il backend resta in ascolto su `http://localhost:3000`. Lascia questo terminale aperto.
+
+### 3. Avvia il frontend nel browser
 
 ```bash
+# Controlla di essere nella folder del frontend in alternativa entraci con il seguente comando
 cd frontend
+
+# Avviamo l'applicativo frontend tramite
 npm run start        # → http://localhost:4200
+# oppure
+ionic serve          # → http://localhost:8100
 ```
 
 ---
 
-## Build produzione Android (cliente esistente)
+## Test su dispositivo Android fisico
 
-Per generare l'APK del cliente `medicapp`:
+Per testare l'app su un telefono reale collegato via USB, servono **tre passi ogni volta che riapri la sessione**.
+
+### Passo 1 — Verifica che Docker e il backend siano attivi
+
+```bash
+# controllare se sì è già nella folder del backend altrimenti eseguire
+cd med-booking-backend 
+
+# avviamo il container docker
+docker-compose up -d
+
+# verifichiamo che il db sia attivo, eseguendo questo comando deve comparire il container PostgreSQL
+docker ps
+
+# avviamo il backend NestJS
+npm run start:dev
+```
+
+### Passo 2 — ADB reverse (porta del backend sul telefono)
+
+Il telefono non può raggiungere `localhost:3000` del PC direttamente. Questo comando lo mappa.
+Per sicurezza assicurarsi di aver avviato il backend prima
+> ⚠ Va rieseguito ogni volta che: scollega/ricollega il cavo USB, riavvii il telefono, riavvii Android Studio.
+
+```bash
+adb reverse tcp:3000 tcp:3000
+```
+
+Verifica che il telefono sia riconosciuto:
+```bash
+adb devices   # deve comparire il tuo device, non "unauthorized"
+```
+
+### Passo 3 — Build di sviluppo e sync
+
+```bash
+cd frontend
+ionic build --configuration=development   # usa environment.ts → http://localhost:3000
+npx cap sync android                      # copia i file nella cartella android/
+```
+
+Poi in **Android Studio** clicca il pulsante **Run ▶** per installare e avviare l'app sul device.
+
+> **Perché `--configuration=development`?**  
+> Da Angular 17 in poi, `ionic build` senza flag usa di default la configurazione `production` (che punta a `https://api.medicapp.codesea.it`). Per i test locali serve specificare `development` esplicitamente.
+
+---
+
+## Build APK / AAB per gli store (produzione)
+
+Quando hai finito di sviluppare e vuoi pubblicare l'app sugli store, usa il flusso di build white-label.
+
+### Build completa per cliente `medicapp`
 
 ```bash
 cd frontend
@@ -74,20 +138,40 @@ npm run build:client -- medicapp
 
 Lo script esegue in sequenza:
 1. Legge `config/clients/medicapp/config.json`
-2. Sovrascrive `environment.prod.ts` con `apiUrl` di produzione
+2. Sovrascrive `environment.prod.ts` con l'`apiUrl` di produzione (`https://api.medicapp.codesea.it`)
 3. Aggiorna `capacitor.config.ts` con `appId` e `appName`
 4. Applica il tema CSS (`variables.scss`)
 5. Copia i file da `config/clients/medicapp/assets/`
 6. Genera icone/splash (se `@capacitor/assets` è installato)
-7. Esegue `ionic build --prod`
+7. Esegue `ionic build --prod` (build ottimizzata con AOT e tree-shaking)
 8. Esegue `npx cap sync android`
 
-Poi apri Android Studio:
+### Genera APK / AAB firmato
+
+Dopo la build, apri Android Studio:
+
 ```bash
 npx cap open android
 ```
 
-> **Nota sviluppo quotidiano**: durante lo sviluppo su MedicApp, continuare a usare `ionic serve` / `ionic cap build android --prod` come di consueto. Il comando `build:client` serve solo per build white-label destinate a clienti diversi.
+Poi scegli:
+- **Build → Generate Signed Bundle / APK → Android App Bundle (.aab)** → per il Play Store
+- **Build → Generate Signed Bundle / APK → APK** → per installazione diretta o store alternativi
+
+Segui la procedura guidata per selezionare o creare il keystore di firma.
+
+> ⚠ **Il keystore è fondamentale**: conservalo in un posto sicuro. Se lo perdi non potrai più aggiornare l'app sugli store con lo stesso bundle ID.
+
+---
+
+## Cheatsheet comandi rapidi
+
+| Situazione | Comandi |
+|---|---|
+| Aprire il progetto da zero per sviluppare | `docker-compose up -d` → `npm run start:dev` (backend) → `npm run start` (frontend) |
+| Testare su device dopo aver modificato codice | `ionic build --configuration=development` → `npx cap sync android` → Run in Android Studio |
+| ADB reverse perso (cavo ricollegato) | `adb reverse tcp:3000 tcp:3000` |
+| Build per pubblicare sugli store | `npm run build:client -- medicapp` → Android Studio → Generate Signed Bundle |
 
 ---
 
