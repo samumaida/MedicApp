@@ -21,13 +21,13 @@ MedicApp/
 │           ├── config.json
 │           └── assets/        ← icon.png, splash.png, logo.png, favicon.png
 ├── frontend/                  ← app Angular/Ionic/Capacitor
-│   ├── capacitor.config.ts    ← ⚠ generato da build:client, non modificare
+│   ├── capacitor.config.ts    ← generato da build:client, non modificare
 │   └── src/
 │       ├── environments/
-│       │   ├── environment.ts          ← URL dev (localhost)
-│       │   └── environment.prod.ts     ← ⚠ generato da build:client
+│       │   ├── environment.ts          ← URL sviluppo (localhost)
+│       │   └── environment.prod.ts     ← generato da build:client
 │       └── theme/
-│           └── variables.scss          ← ⚠ generato da build:client
+│           └── variables.scss          ← generato da build:client
 ├── med-booking-backend/       ← API NestJS
 │   ├── .env                   ← credenziali DB e JWT (NON committare)
 │   └── .env.example           ← template da copiare per nuovi ambienti
@@ -50,11 +50,11 @@ docker-compose up -d
 ### 2. Avvia il backend NestJS
 
 ```bash
-# Controlla di essere nella folder del backend in alternativa entraci con il seguente comando
+# Controllare di essere nella folder del backend in alternativa entraci con il seguente comando
 cd med-booking-backend
 
-# # Solo la prima volta: copia il template .env
-# cp .env.example .env   # poi compila DB_PASSWORD e JWT_SECRET
+# # Solo la prima volta: copiare il template .env
+# cp .env.example .env   # poi compilare DB_PASSWORD e JWT_SECRET
 
 npm run start:dev
 ```
@@ -64,10 +64,10 @@ Il backend resta in ascolto su `http://localhost:3000`. Lascia questo terminale 
 ### 3. Avvia il frontend nel browser
 
 ```bash
-# Controlla di essere nella folder del frontend in alternativa entraci con il seguente comando
+# Controllare di essere nella folder del frontend in alternativa entraci con il seguente comando
 cd frontend
 
-# Avviamo l'applicativo frontend tramite
+# Avviare l'applicativo frontend tramite
 npm run start        # → http://localhost:4200
 # oppure
 ionic serve          # → http://localhost:8100
@@ -85,13 +85,13 @@ Per testare l'app su un telefono reale collegato via USB, servono **tre passi og
 # controllare se sì è già nella folder del backend altrimenti eseguire
 cd med-booking-backend 
 
-# avviamo il container docker
+# avviare il container docker
 docker-compose up -d
 
-# verifichiamo che il db sia attivo, eseguendo questo comando deve comparire il container PostgreSQL
+# verificare che il db sia attivo, eseguendo questo comando deve comparire il container PostgreSQL
 docker ps
 
-# avviamo il backend NestJS
+# avviare il backend NestJS
 npm run start:dev
 ```
 
@@ -105,7 +105,7 @@ Per sicurezza assicurarsi di aver avviato il backend prima
 adb reverse tcp:3000 tcp:3000
 ```
 
-Verifica che il telefono sia riconosciuto:
+Verificare che il telefono sia riconosciuto:
 ```bash
 adb devices   # deve comparire il tuo device, non "unauthorized"
 ```
@@ -118,16 +118,16 @@ ionic build --configuration=development   # usa environment.ts → http://localh
 npx cap sync android                      # copia i file nella cartella android/
 ```
 
-Poi in **Android Studio** clicca il pulsante **Run ▶** per installare e avviare l'app sul device.
+Poi in **Android Studio** cliccare il pulsante **Run ▶** per installare e avviare l'app sul device.
 
-> **Perché `--configuration=development`?**  
+> **`--configuration=development`**  
 > Da Angular 17 in poi, `ionic build` senza flag usa di default la configurazione `production` (che punta a `https://api.medicapp.codesea.it`). Per i test locali serve specificare `development` esplicitamente.
 
 ---
 
 ## Build APK / AAB per gli store (produzione)
 
-Quando hai finito di sviluppare e vuoi pubblicare l'app sugli store, usa il flusso di build white-label.
+Per pubblicare l'app sugli store, usa il flusso di build white-label.
 
 ### Build completa per cliente `medicapp`
 
@@ -148,19 +148,19 @@ Lo script esegue in sequenza:
 
 ### Genera APK / AAB firmato
 
-Dopo la build, apri Android Studio:
+Dopo la build, aprire Android Studio con:
 
 ```bash
 npx cap open android
 ```
 
-Poi scegli:
-- **Build → Generate Signed Bundle / APK → Android App Bundle (.aab)** → per il Play Store
-- **Build → Generate Signed Bundle / APK → APK** → per installazione diretta o store alternativi
+Poi scegliere:
+- **Build → Generate Signed Bundle / APK → Android App Bundle (.aab)** → per pubblicazione Play Store
+- **Build → Generate Signed Bundle / APK → APK** → per installazione diretta sul device
 
 Segui la procedura guidata per selezionare o creare il keystore di firma.
 
-> ⚠ **Il keystore è fondamentale**: conservalo in un posto sicuro. Se lo perdi non potrai più aggiornare l'app sugli store con lo stesso bundle ID.
+> **Importanza del keystore**: Il keystore è la chiave con il quale viene firmata la build. Senza di essa non sarà più possibile aggiornare l'app sugli store con lo stesso bundle ID.
 
 ---
 
@@ -177,9 +177,9 @@ Segui la procedura guidata per selezionare o creare il keystore di firma.
 
 ## Aggiungere un nuovo cliente
 
-Segui questi passi in ordine.
+Seguire questi passi in ordine.
 
-### 1. Crea la cartella di configurazione
+### 1. Creare la cartella di configurazione
 
 ```
 config/
@@ -193,7 +193,7 @@ config/
             └── favicon.png    (512×512 px — versione web)
 ```
 
-### 2. Compila `config.json`
+### 2. Compilare `config.json`
 
 ```json
 {
@@ -241,27 +241,27 @@ Verticali disponibili: `medical` | `beauty` | `fitness` | `generic`
 
 Feature flags: imposta `false` le funzionalità non applicabili al verticale del cliente.
 
-### 3. Crea il database dedicato
+### 3. Creare il database dedicato
 
 ```bash
-# Entra nel container PostgreSQL
+# Entrare nel container PostgreSQL
 docker exec -it medicapp_postgres psql -U postgres
 
-# Crea il nuovo DB
+# Creare il nuovo DB
 CREATE DATABASE salonepaola_db;
 \q
 ```
 
-### 4. Crea il file `.env` per il nuovo cliente
+### 4. Creare il file `.env` per il nuovo cliente
 
-Nel backend, copia `.env.example` e crea un file specifico:
+Nel backend, copiare `.env.example` e creare un file specifico:
 
 ```bash
 cd med-booking-backend
 cp .env.example .env.salonepaola
 ```
 
-Modifica `.env.salonepaola`:
+Modificare `.env.salonepaola`:
 ```
 DB_HOST=localhost
 DB_PORT=5432
@@ -272,16 +272,16 @@ JWT_SECRET=<stringa-lunga-casuale>
 PORT=3001
 ```
 
-> Per sviluppo/test usa una porta diversa (es. 3001) se vuoi far girare due backend in parallelo.
+> Per sviluppo/test usa una porta diversa (es. 3001) se si vuole far girare due backend in parallelo.
 
-### 5. Esegui la build
+### 5. Eseguire la build
 
 ```bash
 cd frontend
 npm run build:client -- salonepaola
 ```
 
-### 6. Apri Android Studio e genera l'APK
+### 6. Aprire Android Studio e generare l'APK
 
 ```bash
 npx cap open android
@@ -309,7 +309,7 @@ npx cap open android
 L'admin non è registrabile dall'app. Va creato direttamente sul DB:
 
 ```sql
--- Prima registra un utente normale dall'app, poi:
+-- Prima registrare un utente normale dall'app, poi:
 UPDATE users SET ruolo = 'admin' WHERE email = 'admin@medicapp.it';
 ```
 
